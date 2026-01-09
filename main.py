@@ -1,7 +1,7 @@
 """MS41/MS43 VinCoder - Main application window."""
 
-__version__ = '0.0.1'
-__author__ = 'https://sprytnyk.dev'
+__version__ = "0.0.1"
+__author__ = "https://sprytnyk.dev"
 
 import os
 import sys
@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QTabWidget,
     QVBoxLayout,
-    QWidget
+    QWidget,
 )
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence
 
@@ -22,14 +22,8 @@ from translations import TRANSLATIONS
 from tabs import VinConverterTab, VinReplacerTab, AboutTab
 
 # Constants
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Use platform-specific icon format
-if sys.platform == 'win32':
-    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.ico")
-elif sys.platform == 'darwin':
-    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.icns")
-else:
-    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.png")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_ICON = os.path.join(BASE_DIR, "assets", "icon.ico")
 
 
 class VinCoder(QMainWindow):
@@ -37,13 +31,13 @@ class VinCoder(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.current_lang = 'en'
+        self.current_lang = "en"
         self._init_ui()
         self._update_ui_language()
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
-        self.setWindowTitle(TRANSLATIONS[self.current_lang]['window_title'])
+        self.setWindowTitle(TRANSLATIONS[self.current_lang]["window_title"])
         self.resize(650, 500)  # Set default window size
 
         # Create central widget
@@ -79,9 +73,15 @@ class VinCoder(QMainWindow):
         central_widget.setLayout(main_layout)
 
         # Add keyboard shortcuts for tabs
-        QShortcut(QKeySequence("Alt+1"), self).activated.connect(lambda: self.tabs.setCurrentIndex(0))
-        QShortcut(QKeySequence("Alt+2"), self).activated.connect(lambda: self.tabs.setCurrentIndex(1))
-        QShortcut(QKeySequence("Alt+3"), self).activated.connect(lambda: self.tabs.setCurrentIndex(2))
+        QShortcut(QKeySequence("Alt+1"), self).activated.connect(
+            lambda: self.tabs.setCurrentIndex(0)
+        )
+        QShortcut(QKeySequence("Alt+2"), self).activated.connect(
+            lambda: self.tabs.setCurrentIndex(1)
+        )
+        QShortcut(QKeySequence("Alt+3"), self).activated.connect(
+            lambda: self.tabs.setCurrentIndex(2)
+        )
 
     def _change_language(self, index: int) -> None:
         """Handle language change from combo box."""
@@ -91,11 +91,11 @@ class VinCoder(QMainWindow):
     def _update_ui_language(self) -> None:
         """Update all UI elements for current language."""
         t = TRANSLATIONS[self.current_lang]
-        self.setWindowTitle(t['window_title'])
-        self.lang_label.setText(t['language'])
-        self.tabs.setTabText(0, t['tab_replacer'])
-        self.tabs.setTabText(1, t['tab_converter'])
-        self.tabs.setTabText(2, t['tab_about'])
+        self.setWindowTitle(t["window_title"])
+        self.lang_label.setText(t["language"])
+        self.tabs.setTabText(0, t["tab_replacer"])
+        self.tabs.setTabText(1, t["tab_converter"])
+        self.tabs.setTabText(2, t["tab_about"])
 
         # Update all tabs
         self.converter_tab.update_language(self.current_lang)
@@ -113,6 +113,7 @@ def main() -> None:
     window.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

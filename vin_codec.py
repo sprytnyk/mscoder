@@ -16,7 +16,7 @@ def _chunk(data: bytes, size: int) -> Iterator[bytes]:
         Chunks of specified size
     """
     for i in range(0, len(data), size):
-        yield data[i:i + size]
+        yield data[i : i + size]
 
 
 def vin_to_str(vin: bytes) -> str:
@@ -36,9 +36,7 @@ def vin_to_str(vin: bytes) -> str:
 
     for a, b, c in _chunk(vin, 3):
         x = (a << 16) | (b << 8) | c
-        chars.extend(
-            CHAR_MAP[(x >> s) & 0x3F] for s in (18, 12, 6, 0)
-        )
+        chars.extend(CHAR_MAP[(x >> s) & 0x3F] for s in (18, 12, 6, 0))
 
     return "".join(chars)[3:]
 

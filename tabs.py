@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
-    QWidget
+    QWidget,
 )
 
 from translations import TRANSLATIONS
@@ -30,9 +30,9 @@ class VinConverterTab(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.lang = 'en'
+        self.lang = "en"
         self._init_ui()
-        self.update_language('en')
+        self.update_language("en")
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
@@ -86,12 +86,12 @@ class VinConverterTab(QWidget):
         """Update UI text for the specified language."""
         self.lang = lang
         t = TRANSLATIONS[lang]
-        self.description.setText(t['conv_title'])
-        self.info.setText(t['conv_description'])
-        self.vin_label.setText(t['conv_vin_string'])
-        self.hex_label.setText(t['conv_hex_bytes'])
-        self.btn_to_hex.setText(t['conv_btn_to_hex'])
-        self.btn_to_str.setText(t['conv_btn_to_str'])
+        self.description.setText(t["conv_title"])
+        self.info.setText(t["conv_description"])
+        self.vin_label.setText(t["conv_vin_string"])
+        self.hex_label.setText(t["conv_hex_bytes"])
+        self.btn_to_hex.setText(t["conv_btn_to_hex"])
+        self.btn_to_str.setText(t["conv_btn_to_str"])
 
     def _to_hex(self) -> None:
         """Convert VIN string to hex bytes."""
@@ -99,12 +99,12 @@ class VinConverterTab(QWidget):
         try:
             vin = self.vin_input.text().strip()
             if len(vin) != VIN_LENGTH:
-                self.status.setText(t['conv_error_vin_length'])
+                self.status.setText(t["conv_error_vin_length"])
                 return
             data = vin_to_bytes(vin)
             hex_result = "".join(f"{b:02X}" for b in data)
             self.hex_input.setText(hex_result)
-            self.status.setText(t['conv_ok'])
+            self.status.setText(t["conv_ok"])
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
@@ -120,21 +120,24 @@ class VinConverterTab(QWidget):
 
             # Validate hex length
             if len(hex_text) != HEX_LENGTH:
-                self.status.setText(t['conv_error_hex_length'])
+                self.status.setText(t["conv_error_hex_length"])
                 return
 
             # Parse hex string in pairs
-            raw = bytes(int(hex_text[i:i+2], 16) for i in range(0, len(hex_text), 2))
+            raw = bytes(
+                int(hex_text[i : i + 2], 16)
+                for i in range(0, len(hex_text), 2)
+            )
             vin = vin_to_str(raw)
 
             if len(vin) != VIN_LENGTH:
-                self.status.setText(t['conv_warning_decoded'].format(len(vin)))
+                self.status.setText(t["conv_warning_decoded"].format(len(vin)))
             else:
-                self.status.setText(t['conv_ok'])
+                self.status.setText(t["conv_ok"])
 
             self.vin_input.setText(vin)
         except ValueError:
-            self.status.setText(t['conv_error_hex_format'])
+            self.status.setText(t["conv_error_hex_format"])
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
@@ -144,9 +147,9 @@ class VinReplacerTab(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.lang = 'en'
+        self.lang = "en"
         self._init_ui()
-        self.update_language('en')
+        self.update_language("en")
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
@@ -207,26 +210,23 @@ class VinReplacerTab(QWidget):
         """Update UI text for the specified language."""
         self.lang = lang
         t = TRANSLATIONS[lang]
-        self.description.setText(t['repl_title'])
-        self.info.setText(t['repl_description'])
-        self.original_label.setText(t['repl_original_vin'])
-        self.replace_label.setText(t['repl_replace_vin'])
-        self.file_label.setText(t['repl_binary_file'])
-        self.btn_select_file.setText(t['repl_btn_select'])
-        self.btn_process.setText(t['repl_btn_process'])
+        self.description.setText(t["repl_title"])
+        self.info.setText(t["repl_description"])
+        self.original_label.setText(t["repl_original_vin"])
+        self.replace_label.setText(t["repl_replace_vin"])
+        self.file_label.setText(t["repl_binary_file"])
+        self.btn_select_file.setText(t["repl_btn_select"])
+        self.btn_process.setText(t["repl_btn_process"])
 
     def _select_file(self) -> None:
         """Open file dialog to select binary file."""
         t = TRANSLATIONS[self.lang]
         file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            t['repl_select_file_title'],
-            "",
-            t['repl_all_files']
+            self, t["repl_select_file_title"], "", t["repl_all_files"]
         )
         if file_path:
             self.file_path_input.setText(file_path)
-            self.status.setText(t['repl_file_selected'])
+            self.status.setText(t["repl_file_selected"])
 
     def _process_file(self) -> None:
         """Find and replace VIN in the selected binary file."""
@@ -238,15 +238,15 @@ class VinReplacerTab(QWidget):
 
             # Validate inputs
             if not original_vin or not replace_vin or not file_path:
-                self.status.setText(t['repl_error_required'])
+                self.status.setText(t["repl_error_required"])
                 return
 
             if len(original_vin) != VIN_LENGTH:
-                self.status.setText(t['repl_error_original_length'])
+                self.status.setText(t["repl_error_original_length"])
                 return
 
             if len(replace_vin) != VIN_LENGTH:
-                self.status.setText(t['repl_error_replace_length'])
+                self.status.setText(t["repl_error_replace_length"])
                 return
 
             # Convert VINs to hex bytes
@@ -254,27 +254,33 @@ class VinReplacerTab(QWidget):
             replace_hex = vin_to_bytes(replace_vin)
 
             # Read the file
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 data = bytearray(f.read())
 
             # Find and replace all occurrences
-            occurrences = self._replace_in_data(data, original_hex, replace_hex)
+            occurrences = self._replace_in_data(
+                data, original_hex, replace_hex
+            )
 
             if occurrences == 0:
-                self.status.setText(t['repl_no_matches'])
+                self.status.setText(t["repl_no_matches"])
                 return
 
             # Save to new file with prefix
             new_file_path = self._get_modified_filepath(file_path)
-            with open(new_file_path, 'wb') as f:
+            with open(new_file_path, "wb") as f:
                 f.write(data)
 
-            self.status.setText(t['repl_success'].format(occurrences, new_file_path))
+            self.status.setText(
+                t["repl_success"].format(occurrences, new_file_path)
+            )
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
     @staticmethod
-    def _replace_in_data(data: bytearray, original: bytes, replacement: bytes) -> int:
+    def _replace_in_data(
+        data: bytearray, original: bytes, replacement: bytes
+    ) -> int:
         """Replace all occurrences in bytearray and return count."""
         occurrences = 0
         pos = 0
@@ -282,7 +288,7 @@ class VinReplacerTab(QWidget):
             pos = data.find(original, pos)
             if pos == -1:
                 break
-            data[pos:pos + len(original)] = replacement
+            data[pos : pos + len(original)] = replacement
             occurrences += 1
             pos += len(original)  # Advance by the length we just replaced
         return occurrences
@@ -302,9 +308,9 @@ class AboutTab(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.lang = 'en'
+        self.lang = "en"
         self._init_ui()
-        self.update_language('en')
+        self.update_language("en")
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
@@ -344,8 +350,8 @@ class AboutTab(QWidget):
         """Update UI text for the specified language."""
         self.lang = lang
         t = TRANSLATIONS[lang]
-        self.title.setText(t['about_title'])
-        self.author.setText(t['about_author'])
-        self.version.setText(t['about_version'])
-        self.desc_title.setText(t['about_header'])
-        self.description.setText(t['about_description'])
+        self.title.setText(t["about_title"])
+        self.author.setText(t["about_author"])
+        self.version.setText(t["about_version"])
+        self.desc_title.setText(t["about_header"])
+        self.description.setText(t["about_description"])
