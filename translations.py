@@ -78,7 +78,7 @@ TRANSLATIONS = {
         'repl_error_original_length': 'Помилка: Оригінальний VIN повинен бути довжиною 17 символів',
         'repl_error_replace_length': 'Помилка: VIN для заміни повинен бути довжиною 17 символів',
         'repl_no_matches': 'Співпадінь не знайдено у файлі',
-        'repl_success': 'Успішно: {0} входження замінено. Збережено у: {1}',
+        'repl_success': 'Успішно: {0} рядків замінено. Збережено у: {1}',
 
         # About tab
         'about_title': 'MS41/MS43 VinCoder',
