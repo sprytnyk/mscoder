@@ -97,6 +97,11 @@ class VinCoder(QWidget):
 def main() -> None:
     """Main application entry point."""
     app = QApplication(sys.argv)
+    
+    # Set application icon (for taskbar/title bar)
+    if os.path.exists(APP_ICON):
+        app.setWindowIcon(QIcon(APP_ICON))
+    
     window = VinCoder()
     window.show()
     sys.exit(app.exec())
