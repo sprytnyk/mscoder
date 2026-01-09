@@ -36,7 +36,7 @@ TRANSLATIONS = {
         # About tab
         "about_title": "MS41/MS43 VinCoder",
         "about_author": 'Author: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/vincoder">https://github.com/sprytnyk/vincoder</a>',
-        "about_version": "Version: 0.0.1",
+        "about_version": "Version: {version}",
         "about_header": "About",
         "about_description": "This tool helps you work with VIN data for BMW MS41 and MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.",
     },
@@ -77,7 +77,7 @@ TRANSLATIONS = {
         # About tab
         "about_title": "MS41/MS43 VinCoder",
         "about_author": 'Автор: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/vincoder">https://github.com/sprytnyk/vincoder</a>',
-        "about_version": "Версія: 0.0.1",
+        "about_version": "Версія: {version}",
         "about_header": "Про програму",
         "about_description": "Цей інструмент допомагає працювати з VIN для блоків керування двигуном BMW MS41 та MS43. Він може конвертувати VIN рядки у їх шістнадцяткове представлення та знаходити/замінювати VIN у бінарних файлах DME.",
     },

@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from meta import __version__
 from translations import TRANSLATIONS
 from vin_codec import vin_to_str, vin_to_bytes
 
@@ -352,6 +353,6 @@ class AboutTab(QWidget):
         t = TRANSLATIONS[lang]
         self.title.setText(t["about_title"])
         self.author.setText(t["about_author"])
-        self.version.setText(t["about_version"])
+        self.version.setText(t["about_version"].format(version=__version__))
         self.desc_title.setText(t["about_header"])
         self.description.setText(t["about_description"])

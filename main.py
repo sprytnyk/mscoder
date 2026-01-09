@@ -1,8 +1,5 @@
 """MS41/MS43 VinCoder - Main application window."""
 
-__version__ = "0.0.1"
-__author__ = "https://sprytnyk.dev"
-
 import os
 import sys
 
@@ -18,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence
 
+from meta import __version__, __author__
 from translations import TRANSLATIONS
 from tabs import VinConverterTab, VinReplacerTab, AboutTab
 
