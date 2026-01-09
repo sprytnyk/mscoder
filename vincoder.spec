@@ -1,23 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-import sys
-
-# -----------------------------
-# Platform-specific icon files
-# -----------------------------
-if sys.platform == "darwin":
-    icon_file = "assets/icon.icns"
-    datas = [
-        ("assets/icon.icns", "assets"),
-    ]
-elif sys.platform == "win32":
-    icon_file = "assets/icon.ico"
-    datas = [
-        ("assets/icon.ico", "assets"),
-    ]
-else:
-    icon_file = None
-    datas = []  # Linux uses .desktop instead
+icon_file = "assets/icon.ico"
+datas = [
+	("assets/icon.ico", "assets"),
+]
 
 a = Analysis(
     ["main.py"],
@@ -34,14 +20,6 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
-# Set icon based on platform
-if sys.platform == "darwin":
-    icon_file = "assets/icon.icns"
-elif sys.platform == "win32":
-    icon_file = "assets/icon.ico"
-else:
-    icon_file = None  # Linux doesn't use icon parameter
-
 exe = EXE(
     pyz,
     a.scripts,
@@ -56,7 +34,7 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
-    disable_windowed_traceback=False,
+    disable_windowed_traceback=True,
     argv_emulation=False,
     target_arch="x86_64",
     codesign_identity=None,
