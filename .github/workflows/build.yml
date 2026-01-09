@@ -1,0 +1,46 @@
+name: Build Distributions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13, windows-2022]
+        include:
+          - os: ubuntu-22.04
+            artifact_name: vincoder-linux
+            output_path: dist/vincoder
+          - os: macos-13
+            artifact_name: vincoder-macos
+            output_path: dist/vincoder
+          - os: windows-2022
+            artifact_name: vincoder-windows.exe
+            output_path: dist/vincoder.exe
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller vincoder.spec
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: ${{ matrix.output_path }}
+        if-no-files-found: error
