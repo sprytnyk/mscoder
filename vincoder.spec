@@ -2,11 +2,28 @@
 
 import sys
 
+# -----------------------------
+# Platform-specific icon files
+# -----------------------------
+if sys.platform == "darwin":
+    icon_file = "assets/icon.icns"
+    datas = [
+        ("assets/icon.icns", "assets"),
+    ]
+elif sys.platform == "win32":
+    icon_file = "assets/icon.ico"
+    datas = [
+        ("assets/icon.ico", "assets"),
+    ]
+else:
+    icon_file = None
+    datas = []  # Linux uses .desktop instead
+
 a = Analysis(
-    ['main.py'],
+    ["main.py"],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=datas,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -18,10 +35,10 @@ a = Analysis(
 pyz = PYZ(a.pure)
 
 # Set icon based on platform
-if sys.platform == 'darwin':
-    icon_file = 'assets/icon.icns'
-elif sys.platform == 'win32':
-    icon_file = 'assets/icon.ico'
+if sys.platform == "darwin":
+    icon_file = "assets/icon.icns"
+elif sys.platform == "win32":
+    icon_file = "assets/icon.ico"
 else:
     icon_file = None  # Linux doesn't use icon parameter
 
@@ -31,7 +48,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='vincoder',
+    name="vincoder",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -41,7 +58,7 @@ exe = EXE(
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch='x86_64',
+    target_arch="x86_64",
     codesign_identity=None,
     entitlements_file=None,
     icon=icon_file,
