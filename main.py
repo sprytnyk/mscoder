@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
     QLabel,
+    QMainWindow,
     QTabWidget,
     QVBoxLayout,
     QWidget
@@ -22,10 +23,16 @@ from tabs import VinConverterTab, VinReplacerTab, AboutTab
 
 # Constants
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.png")
+# Use platform-specific icon format
+if sys.platform == 'win32':
+    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.ico")
+elif sys.platform == 'darwin':
+    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.icns")
+else:
+    APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.png")
 
 
-class VinCoder(QWidget):
+class VinCoder(QMainWindow):
     """Main window with tabs."""
 
     def __init__(self):
@@ -38,8 +45,10 @@ class VinCoder(QWidget):
         """Initialize UI components."""
         self.setWindowTitle(TRANSLATIONS[self.current_lang]['window_title'])
         self.resize(650, 500)  # Set default window size
-        if os.path.exists(APP_ICON):
-            self.setWindowIcon(QIcon(APP_ICON))
+
+        # Create central widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
         # Main layout
         main_layout = QVBoxLayout()
@@ -67,7 +76,7 @@ class VinCoder(QWidget):
         self.tabs.addTab(self.about_tab, "")
 
         main_layout.addWidget(self.tabs)
-        self.setLayout(main_layout)
+        central_widget.setLayout(main_layout)
 
         # Add keyboard shortcuts for tabs
         QShortcut(QKeySequence("Alt+1"), self).activated.connect(lambda: self.tabs.setCurrentIndex(0))
@@ -95,17 +104,15 @@ class VinCoder(QWidget):
 
 
 def main() -> None:
-    """Main application entry point."""
     app = QApplication(sys.argv)
-    
-    # Set application icon (for taskbar/title bar)
-    if os.path.exists(APP_ICON):
-        app.setWindowIcon(QIcon(APP_ICON))
-    
-    window = VinCoder()
-    window.show()
-    sys.exit(app.exec())
+    icon = QIcon(APP_ICON)
+    app.setWindowIcon(icon)
 
+    window = VinCoder()
+    window.setWindowIcon(icon)
+    window.show()
+
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()
