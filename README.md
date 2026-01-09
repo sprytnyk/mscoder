@@ -1,5 +1,7 @@
 # VinCoder
 
+Supported languages: 🇬🇧 English | 🇺🇦 Українська
+
 This tool helps you work with VIN data for BMW MS41 and MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.
 
 ![Converter](assets/converter.png)
