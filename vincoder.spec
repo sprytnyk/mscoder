@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
 
 a = Analysis(
     ['main.py'],
@@ -15,6 +16,14 @@ a = Analysis(
     optimize=0,
 )
 pyz = PYZ(a.pure)
+
+# Set icon based on platform
+if sys.platform == 'darwin':
+    icon_file = 'assets/icon.icns'
+elif sys.platform == 'win32':
+    icon_file = 'assets/icon.ico'
+else:
+    icon_file = None  # Linux doesn't use icon parameter
 
 exe = EXE(
     pyz,
@@ -35,4 +44,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=icon_file,
 )

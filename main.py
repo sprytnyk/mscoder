@@ -22,7 +22,7 @@ from tabs import VinConverterTab, VinReplacerTab, AboutTab
 
 # Constants
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-APP_ICON = os.path.join(SCRIPT_DIR, "icon.png")
+APP_ICON = os.path.join(SCRIPT_DIR, "assets", "icon.png")
 
 
 class VinCoder(QWidget):
