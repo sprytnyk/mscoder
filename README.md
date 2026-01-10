@@ -1,9 +1,9 @@
 # MSCoder
 
-> **⚠️ DISCLAIMER:** Modifying firmware carries risks, including the potential to brick your DME. Use this tool at your own risk. I am not responsible for any damage.
+> **⚠️ DISCLAIMER:** Modifying firmware carries risks, including the potential to brick your DME. **Always create a backup of your original firmware before making any modifications.** Use this tool at your own risk. I am not responsible for any damage.
 
 Supported languages: 🇬🇧 English | 🇺🇦 Українська  
-Supported platforms: Linux, macOS, Windows
+Supported platforms: Linux | macOS | Windows
 
 This tool helps you work with VIN data for BMW MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.
 
