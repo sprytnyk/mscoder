@@ -7,9 +7,6 @@ Supported platforms: Linux | macOS | Windows
 
 This tool helps you work with VIN data for BMW MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.
 
-![Converter](assets/converter.png)
-![Replacer](assets/replacer.png)
-
 ## Compatibility
 
 This tool updates VIN in binary DME files for **MS41**, **MS42** and **MS43** engine control units. It has been thoroughly tested and confirmed to work with MS43. It may also work with other MS4X variants but requires additional testing to confirm full compatibility.
@@ -18,9 +15,12 @@ This tool updates VIN in binary DME files for **MS41**, **MS42** and **MS43** en
 
 ## Features
 
-- **VIN Converter**: Convert between VIN string and hex bytes
 - **VIN Replacer**: Replace VIN in binary files
+![Replacer](assets/replacer.png)
+- **VIN Converter**: Convert between VIN string and hex bytes
+![Converter](assets/converter.png)
 - **ISN Copier**: Copy ISN (Immobilizer Sequence Number) from one MS43 firmware to another, with optional EWS  bypass functionality
+![Copier](assets/copier.png)
 
 ## Installation
 

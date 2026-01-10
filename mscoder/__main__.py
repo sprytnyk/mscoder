@@ -29,9 +29,20 @@ except ImportError:
     from mscoder.translations import get_translations
     from mscoder.tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
 
+def get_assets_dir():
+    """Get assets directory, handling both dev and PyInstaller environments."""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        base = Path(sys._MEIPASS)
+    else:
+        # Running in development
+        base = Path(__file__).resolve().parent.parent
+
+    return base
+
 # Constants
-BASE_DIR = Path(__file__).resolve().parent.parent
-APP_ICON = str(BASE_DIR / "assets" / "icon.ico")
+ASSETS_DIR = get_assets_dir()
+APP_ICON = str(ASSETS_DIR / "assets" / "icon.ico")
 
 
 class MSCoder(QMainWindow):
