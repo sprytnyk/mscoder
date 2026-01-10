@@ -1,7 +1,7 @@
 """MS43 MSCoder - Main application window."""
 
-import os
 import sys
+from pathlib import Path
 
 from PySide6.QtWidgets import (
     QApplication,
@@ -15,13 +15,13 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence
 
-from mscoder import __version__, __author__
-from mscoder.translations import get_translations
-from mscoder.tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
+from . import __version__, __author__
+from .translations import get_translations
+from .tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
 
 # Constants
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-APP_ICON = os.path.join(BASE_DIR, "assets", "icon.ico")
+BASE_DIR = Path(__file__).resolve().parent.parent
+APP_ICON = str(BASE_DIR / "assets" / "icon.ico")
 
 
 class MSCoder(QMainWindow):

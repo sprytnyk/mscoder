@@ -1,7 +1,7 @@
 """ISN Copier tab - copies ISN values between binary firmware files."""
 
-import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -317,8 +317,6 @@ class IsnCopierTab(QWidget):
     @staticmethod
     def _get_modified_filepath(original_path: str) -> str:
         """Generate modified file path with datetime suffix."""
-        dir_path = os.path.dirname(original_path)
-        file_name = os.path.basename(original_path)
-        name_without_ext, ext = os.path.splitext(file_name)
+        path = Path(original_path)
         timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
-        return os.path.join(dir_path, f"{name_without_ext}_{timestamp}{ext}")
+        return str(path.parent / f"{path.stem}_{timestamp}{path.suffix}")

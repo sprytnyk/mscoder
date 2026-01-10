@@ -56,7 +56,7 @@ class AboutTab(QWidget):
 
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
-        from mscoder import __version__
+        from .. import __version__
         self.lang = lang
         self.t = get_translations(lang).ABOUT
         self.title.setText(self.t["title"])
