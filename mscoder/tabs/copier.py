@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..translations import TRANSLATIONS
+from ..translations import get_translations
 
 # Constants
 INPUT_HEIGHT = 30
@@ -115,24 +115,23 @@ class IsnCopierTab(QWidget):
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
         self.lang = lang
-        t = TRANSLATIONS[lang]
-        self.description.setText(t["isn_title"])
-        self.info.setText(t["isn_description"])
-        self.ms43_warning.setText(f"<b style='color: red;'>{t['isn_ms43_only']}</b>")
-        self.source_label.setText(t["isn_source_file"])
-        self.target_label.setText(t["isn_target_file"])
-        self.isn_label.setText(t["isn_value_label"])
-        self.btn_select_source.setText(t["isn_btn_select"])
-        self.btn_select_target.setText(t["isn_btn_select"])
-        self.btn_process.setText(t["isn_btn_process"])
-        self.immobiliser_bypass_checkbox.setText(t["isn_immobiliser_bypass"])
-        self.immobiliser_revert_checkbox.setText(t["isn_immobiliser_revert"])
+        self.t = get_translations(lang).ISN_COPIER
+        self.description.setText(self.t["title"])
+        self.info.setText(self.t["description"])
+        self.ms43_warning.setText(f"<b style='color: red;'>{self.t['ms43_only']}</b>")
+        self.source_label.setText(self.t["source_file"])
+        self.target_label.setText(self.t["target_file"])
+        self.isn_label.setText(self.t["value_label"])
+        self.btn_select_source.setText(self.t["btn_select"])
+        self.btn_select_target.setText(self.t["btn_select"])
+        self.btn_process.setText(self.t["btn_process"])
+        self.immobiliser_bypass_checkbox.setText(self.t["immobiliser_bypass"])
+        self.immobiliser_revert_checkbox.setText(self.t["immobiliser_revert"])
 
     def _select_source_file(self) -> None:
         """Open file dialog to select source binary file."""
-        t = TRANSLATIONS[self.lang]
         file_path, _ = QFileDialog.getOpenFileName(
-            self, t["isn_select_source_title"], "", t["isn_all_files"]
+            self, self.t["select_source_title"], "", self.t["all_files"]
         )
         if file_path:
             self.source_file_input.setText(file_path)
@@ -140,14 +139,13 @@ class IsnCopierTab(QWidget):
 
     def _select_target_file(self) -> None:
         """Open file dialog to select target binary file."""
-        t = TRANSLATIONS[self.lang]
         file_path, _ = QFileDialog.getOpenFileName(
-            self, t["isn_select_target_title"], "", t["isn_all_files"]
+            self, self.t["select_target_title"], "", self.t["all_files"]
         )
         if file_path:
             self.target_file_input.setText(file_path)
             self._check_bypass_state(file_path)
-            self.status.setText(t["isn_target_selected"])
+            self.status.setText(self.t["target_selected"])
 
     def _check_bypass_state(self, file_path: str) -> None:
         """Check if immobiliser bypass is applied and show/hide checkboxes accordingly."""
@@ -186,35 +184,33 @@ class IsnCopierTab(QWidget):
 
     def _read_isn_value(self, file_path: str) -> None:
         """Read ISN value from source file and display it."""
-        t = TRANSLATIONS[self.lang]
         try:
             with open(file_path, "rb") as f:
                 f.seek(ISN_ADDRESS)
                 isn_bytes = f.read(ISN_LENGTH)
 
                 if len(isn_bytes) < ISN_LENGTH:
-                    self.status.setText(t["isn_error_file_too_small"])
+                    self.status.setText(self.t["error_file_too_small"])
                     self.isn_value_display.setText("")
                     return
 
                 # Display as hex string
                 hex_value = "".join(f"{b:02X}" for b in isn_bytes)
                 self.isn_value_display.setText(hex_value)
-                self.status.setText(t["isn_source_selected"])
+                self.status.setText(self.t["source_selected"])
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
             self.isn_value_display.setText("")
 
     def _process_files(self) -> None:
         """Copy ISN value from source to target file."""
-        t = TRANSLATIONS[self.lang]
         try:
             source_path = self.source_file_input.text().strip()
             target_path = self.target_file_input.text().strip()
 
             # Validate inputs
             if not source_path or not target_path:
-                self.status.setText(t["isn_error_required"])
+                self.status.setText(self.t["error_required"])
                 return
 
             # Read ISN from source
@@ -223,7 +219,7 @@ class IsnCopierTab(QWidget):
                 isn_bytes = f.read(ISN_LENGTH)
 
                 if len(isn_bytes) < ISN_LENGTH:
-                    self.status.setText(t["isn_error_file_too_small"])
+                    self.status.setText(self.t["error_file_too_small"])
                     return
 
             # Read target file
@@ -232,7 +228,7 @@ class IsnCopierTab(QWidget):
 
             # Check target file size (need 76 bytes from ISN_ADDRESS)
             if len(target_data) < ISN_ADDRESS + 76:
-                self.status.setText(t["isn_error_target_too_small"])
+                self.status.setText(self.t["error_target_too_small"])
                 return
 
             # First, fill 76 bytes with 0xFF starting at ISN_ADDRESS
@@ -314,7 +310,7 @@ class IsnCopierTab(QWidget):
                 f.write(target_data)
 
             hex_value = "".join(f"{b:02X}" for b in isn_bytes)
-            self.status.setText(t["isn_success"].format(hex_value, new_file_path))
+            self.status.setText(self.t["success"].format(hex_value, new_file_path))
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 

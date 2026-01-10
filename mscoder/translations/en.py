@@ -1,66 +1,79 @@
 """English translations."""
 
-TRANSLATIONS = {
+# Common translations
+COMMON = {
     "window_title": "MSCoder",
     "language": "Language:",
     "tab_converter": "Converter",
     "tab_replacer": "File Replacer",
     "tab_isn_copier": "ISN Copier",
     "tab_about": "About",
-    # Converter tab
-    "conv_title": "VIN Converter",
-    "conv_description": "Convert VIN strings to hex format and vice versa for BMW DMEs.",
-    "conv_vin_string": "VIN string:",
-    "conv_hex_bytes": "HEX bytes:",
-    "conv_btn_to_hex": "STR → HEX",
-    "conv_btn_to_str": "HEX → STR",
-    "conv_error_vin_length": "Error: VIN must be 17 characters long",
-    "conv_error_hex_length": "Error: Hex must be 26 hex digits (13 bytes)",
-    "conv_error_hex_format": "Error: Invalid hex format",
-    "conv_warning_decoded": "Warning: Decoded VIN is {0} chars (expected 17)",
-    "conv_ok": "OK",
-    "conv_supported": "Supported: MS41, MS42, MS43",
-    # File Replacer tab
-    "repl_title": "VIN Replacer for Binary Files",
-    "repl_description": "Find and replace VIN hex patterns in binary files. The modified file will be saved with a UTC datetime suffix.",
-    "repl_original_vin": "Original VIN (string):",
-    "repl_replace_vin": "Replacement VIN (string):",
-    "repl_binary_file": "Binary file:",
-    "repl_btn_select": "Select File",
-    "repl_btn_process": "Find and Replace in File",
-    "repl_select_file_title": "Select Binary File",
-    "repl_all_files": "All Files (*.*)",
-    "repl_file_selected": "File selected",
-    "repl_error_required": "Error: All fields are required",
-    "repl_error_original_length": "Error: Original VIN must be 17 characters long",
-    "repl_error_replace_length": "Error: Replacement VIN must be 17 characters long",
-    "repl_no_matches": "No matches found in file",
-    "repl_success": "Success: {0} occurrence(s) replaced. Saved to: {1}",
-    "repl_supported": "Supported: MS41, MS42, MS43",
-    # ISN Copier tab
-    "isn_title": "ISN Copier",
-    "isn_description": "Copy ISN value from one firmware file to another. The ISN is located at address 0x3ED4 (6 bytes).",
-    "isn_source_file": "Source file (read ISN from):",
-    "isn_target_file": "Target file (write ISN to):",
-    "isn_value_label": "ISN value from source:",
-    "isn_btn_select": "Select File",
-    "isn_btn_process": "Copy ISN to Target",
-    "isn_select_source_title": "Select Source Firmware File",
-    "isn_select_target_title": "Select Target Firmware File",
-    "isn_all_files": "All Files (*.*)",
-    "isn_source_selected": "Source file selected and ISN value read",
-    "isn_target_selected": "Target file selected",
-    "isn_error_required": "Error: Both source and target files are required",
-    "isn_error_file_too_small": "Error: Source file is too small (address 0x3ED4 + 6 bytes required)",
-    "isn_error_target_too_small": "Error: Target file is too small (address 0x3ED4 + 6 bytes required)",
-    "isn_success": "Success: ISN value {0} copied to target file. Saved to: {1}",
-    "isn_ms43_only": "This functionality is solely for MS43",
-    "isn_immobiliser_bypass": "Immobiliser bypass",
-    "isn_immobiliser_revert": "Revert immobiliser bypass",
-    # About tab
-    "about_title": "MS43 MSCoder",
-    "about_author": 'Author: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
-    "about_version": "Version: {version}",
-    "about_header": "About",
-    "about_description": "This tool helps you work with VIN data for BMW MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.",
+}
+
+# Converter tab
+CONVERTER = {
+    "title": "VIN Converter",
+    "description": "Convert VIN strings to hex format and vice versa for BMW DMEs.",
+    "vin_string": "VIN string:",
+    "hex_bytes": "HEX bytes:",
+    "btn_to_hex": "STR → HEX",
+    "btn_to_str": "HEX → STR",
+    "error_vin_length": "Error: VIN must be 17 characters long",
+    "error_hex_length": "Error: Hex must be 26 hex digits (13 bytes)",
+    "error_hex_format": "Error: Invalid hex format",
+    "warning_decoded": "Warning: Decoded VIN is {0} chars (expected 17)",
+    "ok": "OK",
+    "supported": "Supported: MS41, MS42, MS43",
+}
+
+# File Replacer tab
+REPLACER = {
+    "title": "VIN Replacer for Binary Files",
+    "description": "Find and replace VIN hex patterns in binary files. The modified file will be saved with a UTC datetime suffix.",
+    "original_vin": "Original VIN (string):",
+    "replace_vin": "Replacement VIN (string):",
+    "binary_file": "Binary file:",
+    "btn_select": "Select File",
+    "btn_process": "Find and Replace in File",
+    "select_file_title": "Select Binary File",
+    "all_files": "All Files (*.*)",
+    "file_selected": "File selected",
+    "error_required": "Error: All fields are required",
+    "error_original_length": "Error: Original VIN must be 17 characters long",
+    "error_replace_length": "Error: Replacement VIN must be 17 characters long",
+    "no_matches": "No matches found in file",
+    "success": "Success: {0} occurrence(s) replaced. Saved to: {1}",
+    "supported": "Supported: MS41, MS42, MS43",
+}
+
+# ISN Copier tab
+ISN_COPIER = {
+    "title": "ISN Copier",
+    "description": "Copy ISN value from one firmware file to another. The ISN is located at address 0x3ED4 (6 bytes).",
+    "source_file": "Source file (read ISN from):",
+    "target_file": "Target file (write ISN to):",
+    "value_label": "ISN value from source:",
+    "btn_select": "Select File",
+    "btn_process": "Copy ISN to Target",
+    "select_source_title": "Select Source Firmware File",
+    "select_target_title": "Select Target Firmware File",
+    "all_files": "All Files (*.*)",
+    "source_selected": "Source file selected and ISN value read",
+    "target_selected": "Target file selected",
+    "error_required": "Error: Both source and target files are required",
+    "error_file_too_small": "Error: Source file is too small (address 0x3ED4 + 6 bytes required)",
+    "error_target_too_small": "Error: Target file is too small (address 0x3ED4 + 6 bytes required)",
+    "success": "Success: ISN value {0} copied to target file. Saved to: {1}",
+    "ms43_only": "This functionality is solely for MS43",
+    "immobiliser_bypass": "Immobiliser bypass",
+    "immobiliser_revert": "Revert immobiliser bypass",
+}
+
+# About tab
+ABOUT = {
+    "title": "MS43 MSCoder",
+    "author": 'Author: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
+    "version": "Version: {version}",
+    "header": "About",
+    "description": "This tool helps you work with VIN data for BMW MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.",
 }

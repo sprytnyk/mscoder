@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence
 
 from mscoder import __version__, __author__
-from mscoder.translations import TRANSLATIONS
+from mscoder.translations import get_translations
 from mscoder.tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
 
 # Constants
@@ -35,7 +35,7 @@ class MSCoder(QMainWindow):
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
-        self.setWindowTitle(TRANSLATIONS[self.current_lang]["window_title"])
+        self.setWindowTitle(get_translations(self.current_lang).COMMON["window_title"])
         self.resize(650, 500)  # Set default window size
 
         # Create central widget
@@ -93,7 +93,7 @@ class MSCoder(QMainWindow):
 
     def _update_ui_language(self) -> None:
         """Update all UI elements for current language."""
-        t = TRANSLATIONS[self.current_lang]
+        t = get_translations(self.current_lang).COMMON
         self.setWindowTitle(t["window_title"])
         self.lang_label.setText(t["language"])
         self.tabs.setTabText(0, t["tab_replacer"])

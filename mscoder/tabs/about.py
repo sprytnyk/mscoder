@@ -2,7 +2,7 @@
 
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from ..translations import TRANSLATIONS
+from ..translations import get_translations
 
 # Styling constants
 STYLE_SUBTITLE = "font-weight: bold; font-size: 18px; margin-bottom: 10px;"
@@ -57,11 +57,10 @@ class AboutTab(QWidget):
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
         from mscoder import __version__
-
         self.lang = lang
-        t = TRANSLATIONS[lang]
-        self.title.setText(t["about_title"])
-        self.author.setText(t["about_author"])
-        self.version.setText(t["about_version"].format(version=__version__))
-        self.desc_title.setText(t["about_header"])
-        self.description.setText(t["about_description"])
+        self.t = get_translations(lang).ABOUT
+        self.title.setText(self.t["title"])
+        self.author.setText(self.t["author"])
+        self.version.setText(self.t["version"].format(version=__version__))
+        self.desc_title.setText(self.t["header"])
+        self.description.setText(self.t["description"])

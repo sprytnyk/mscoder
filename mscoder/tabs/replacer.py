@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..translations import TRANSLATIONS
+from ..translations import get_translations
 from ..utils import vin_to_bytes
 
 # Constants
@@ -96,29 +96,27 @@ class VinReplacerTab(QWidget):
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
         self.lang = lang
-        t = TRANSLATIONS[lang]
-        self.description.setText(t["repl_title"])
-        self.info.setText(t["repl_description"])
-        self.supported_label.setText(f"<b>{t['repl_supported']}</b>")
-        self.original_label.setText(t["repl_original_vin"])
-        self.replace_label.setText(t["repl_replace_vin"])
-        self.file_label.setText(t["repl_binary_file"])
-        self.btn_select_file.setText(t["repl_btn_select"])
-        self.btn_process.setText(t["repl_btn_process"])
+        self.t = get_translations(lang).REPLACER
+        self.description.setText(self.t["title"])
+        self.info.setText(self.t["description"])
+        self.supported_label.setText(f"<b>{self.t['supported']}</b>")
+        self.original_label.setText(self.t["original_vin"])
+        self.replace_label.setText(self.t["replace_vin"])
+        self.file_label.setText(self.t["binary_file"])
+        self.btn_select_file.setText(self.t["btn_select"])
+        self.btn_process.setText(self.t["btn_process"])
 
     def _select_file(self) -> None:
         """Open file dialog to select binary file."""
-        t = TRANSLATIONS[self.lang]
         file_path, _ = QFileDialog.getOpenFileName(
-            self, t["repl_select_file_title"], "", t["repl_all_files"]
+            self, self.t["select_file_title"], "", self.t["all_files"]
         )
         if file_path:
             self.file_path_input.setText(file_path)
-            self.status.setText(t["repl_file_selected"])
+            self.status.setText(self.t["file_selected"])
 
     def _process_file(self) -> None:
         """Find and replace VIN in the selected binary file."""
-        t = TRANSLATIONS[self.lang]
         try:
             original_vin = self.original_vin_input.text().strip()
             replace_vin = self.replace_vin_input.text().strip()
@@ -126,15 +124,15 @@ class VinReplacerTab(QWidget):
 
             # Validate inputs
             if not original_vin or not replace_vin or not file_path:
-                self.status.setText(t["repl_error_required"])
+                self.status.setText(self.t["error_required"])
                 return
 
             if len(original_vin) != VIN_LENGTH:
-                self.status.setText(t["repl_error_original_length"])
+                self.status.setText(self.t["error_original_length"])
                 return
 
             if len(replace_vin) != VIN_LENGTH:
-                self.status.setText(t["repl_error_replace_length"])
+                self.status.setText(self.t["error_replace_length"])
                 return
 
             # Convert VINs to hex bytes
@@ -149,7 +147,7 @@ class VinReplacerTab(QWidget):
             occurrences = self._replace_in_data(data, original_hex, replace_hex)
 
             if occurrences == 0:
-                self.status.setText(t["repl_no_matches"])
+                self.status.setText(self.t["no_matches"])
                 return
 
             # Save to new file with prefix
@@ -157,7 +155,7 @@ class VinReplacerTab(QWidget):
             with open(new_file_path, "wb") as f:
                 f.write(data)
 
-            self.status.setText(t["repl_success"].format(occurrences, new_file_path))
+            self.status.setText(self.t["success"].format(occurrences, new_file_path))
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 

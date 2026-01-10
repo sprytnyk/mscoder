@@ -1,66 +1,81 @@
 """Ukrainian translations."""
 
-TRANSLATIONS = {
+# Common translations
+COMMON = {
     "window_title": "MSCoder",
     "language": "Мова:",
     "tab_converter": "Конвертер",
     "tab_replacer": "Заміна у файлі",
     "tab_isn_copier": "Копіювання ISN",
     "tab_about": "Про програму",
-    # Converter tab
-    "conv_title": "VIN Конвертер",
-    "conv_description": "Конвертувати VIN рядки у hex формат і навпаки для блоків BMW DME.",
-    "conv_vin_string": "VIN рядок:",
-    "conv_hex_bytes": "HEX байти:",
-    "conv_btn_to_hex": "РЯДОК → HEX",
-    "conv_btn_to_str": "HEX → РЯДОК",
-    "conv_error_vin_length": "Помилка: VIN повинен бути довжиною 17 символів",
-    "conv_error_hex_length": "Помилка: Hex повинен бути 26 hex цифр (13 байтів)",
-    "conv_error_hex_format": "Помилка: Невірний hex формат",
-    "conv_warning_decoded": "Попередження: Декодований VIN має {0} символів (очікується 17)",
-    "conv_ok": "OK",
-    "conv_supported": "Підтримується: MS41, MS42, MS43",
-    # File Replacer tab
-    "repl_title": "Заміна VIN у бінарних файлах",
-    "repl_description": "Знайти та замінити VIN HEX у бінарному файлі. Змінений файл буде збережено з UTC datetime суфіксом.",
-    "repl_original_vin": "Оригінальний VIN (рядок):",
-    "repl_replace_vin": "VIN для заміни (рядок):",
-    "repl_binary_file": "Бінарний файл:",
-    "repl_btn_select": "Вибрати файл",
-    "repl_btn_process": "Знайти та замінити у файлі",
-    "repl_select_file_title": "Виберіть бінарний файл",
-    "repl_all_files": "Всі файли (*.*)",
-    "repl_file_selected": "Файл вибрано",
-    "repl_error_required": "Помилка: Всі поля обов'язкові",
-    "repl_error_original_length": "Помилка: Оригінальний VIN повинен бути довжиною 17 символів",
-    "repl_error_replace_length": "Помилка: VIN для заміни повинен бути довжиною 17 символів",
-    "repl_no_matches": "Співпадінь не знайдено у файлі",
-    "repl_success": "Успішно: {0} рядків замінено. Збережено у: {1}",
-    "repl_supported": "Підтримується: MS41, MS42, MS43",
-    # ISN Copier tab
-    "isn_title": "Копіювання ISN",
-    "isn_description": "Копіювати значення ISN з одного файлу прошивки в інший. ISN розташований за адресою 0x3ED4 (6 байтів).",
-    "isn_source_file": "Вхідний файл (зчитати ISN з):",
-    "isn_target_file": "Кінцевий файл (записати ISN в):",
-    "isn_value_label": "Значення ISN з вхідного файлу:",
-    "isn_btn_select": "Вибрати файл",
-    "isn_btn_process": "Копіювати ISN в файл",
-    "isn_select_source_title": "Виберіть вхідний файл прошивки",
-    "isn_select_target_title": "Виберіть кінцевий файл прошивки",
-    "isn_all_files": "Всі файли (*.*)",
-    "isn_source_selected": "Вхідний файл вибрано та значення ISN зчитано",
-    "isn_target_selected": "Кінцевий файл вибрано",
-    "isn_error_required": "Помилка: Потрібні обидва файли (вхідний та кінцевий)",
-    "isn_error_file_too_small": "Помилка: Вхідний файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
-    "isn_error_target_too_small": "Помилка: Кінцевий файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
-    "isn_success": "Успішно: значення ISN {0} скопійовано в кінцевий файл. Збережено у: {1}",
-    "isn_ms43_only": "Цей функціонал виключно для MS43",
-    "isn_immobiliser_bypass": "Вимкнення імобілайзера",
-    "isn_immobiliser_revert": "Відновити імобілайзер",
-    # About tab
-    "about_title": "MS43 MSCoder",
-    "about_author": 'Автор: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
-    "about_version": "Версія: {version}",
-    "about_header": "Про програму",
-    "about_description": "Цей інструмент допомагає працювати з VIN для блоків керування двигуном BMW MS43. Він може конвертувати VIN рядки у їх шістнадцяткове представлення та знаходити/замінювати VIN у бінарних файлах DME.",
 }
+
+# Converter tab
+CONVERTER = {
+    "title": "VIN Конвертер",
+    "description": "Конвертувати VIN рядки у hex формат і навпаки для блоків BMW DME.",
+    "vin_string": "VIN рядок:",
+    "hex_bytes": "HEX байти:",
+    "btn_to_hex": "РЯДОК → HEX",
+    "btn_to_str": "HEX → РЯДОК",
+    "error_vin_length": "Помилка: VIN повинен бути довжиною 17 символів",
+    "error_hex_length": "Помилка: Hex повинен бути 26 hex цифр (13 байтів)",
+    "error_hex_format": "Помилка: Невірний hex формат",
+    "warning_decoded": "Попередження: Декодований VIN має {0} символів (очікується 17)",
+    "ok": "OK",
+    "supported": "Підтримується: MS41, MS42, MS43",
+}
+
+# File Replacer tab
+REPLACER = {
+    "title": "Заміна VIN у бінарних файлах",
+    "description": "Знайти та замінити VIN HEX у бінарному файлі. Змінений файл буде збережено з UTC datetime суфіксом.",
+    "original_vin": "Оригінальний VIN (рядок):",
+    "replace_vin": "VIN для заміни (рядок):",
+    "binary_file": "Бінарний файл:",
+    "btn_select": "Вибрати файл",
+    "btn_process": "Знайти та замінити у файлі",
+    "select_file_title": "Виберіть бінарний файл",
+    "all_files": "Всі файли (*.*)",
+    "file_selected": "Файл вибрано",
+    "error_required": "Помилка: Всі поля обов'язкові",
+    "error_original_length": "Помилка: Оригінальний VIN повинен бути довжиною 17 символів",
+    "error_replace_length": "Помилка: VIN для заміни повинен бути довжиною 17 символів",
+    "no_matches": "Співпадінь не знайдено у файлі",
+    "success": "Успішно: {0} рядків замінено. Збережено у: {1}",
+    "supported": "Підтримується: MS41, MS42, MS43",
+}
+
+# ISN Copier tab
+ISN_COPIER = {
+    "title": "Копіювання ISN",
+    "description": "Копіювати значення ISN з одного файлу прошивки в інший. ISN розташований за адресою 0x3ED4 (6 байтів).",
+    "source_file": "Вхідний файл (зчитати ISN з):",
+    "target_file": "Кінцевий файл (записати ISN в):",
+    "value_label": "Значення ISN з вхідного файлу:",
+    "btn_select": "Вибрати файл",
+    "btn_process": "Копіювати ISN в файл",
+    "select_source_title": "Виберіть вхідний файл прошивки",
+    "select_target_title": "Виберіть кінцевий файл прошивки",
+    "all_files": "Всі файли (*.*)",
+    "source_selected": "Вхідний файл вибрано та значення ISN зчитано",
+    "target_selected": "Кінцевий файл вибрано",
+    "error_required": "Помилка: Потрібні обидва файли (вхідний та кінцевий)",
+    "error_file_too_small": "Помилка: Вхідний файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
+    "error_target_too_small": "Помилка: Кінцевий файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
+    "success": "Успішно: значення ISN {0} скопійовано в кінцевий файл. Збережено у: {1}",
+    "ms43_only": "Цей функціонал виключно для MS43",
+    "immobiliser_bypass": "Вимкнення імобілайзера",
+    "immobiliser_revert": "Відновити імобілайзер",
+}
+
+# About tab
+ABOUT = {
+    "title": "MS43 MSCoder",
+    "author": 'Автор: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
+    "version": "Версія: {version}",
+    "header": "Про програму",
+    "description": "Цей інструмент допомагає працювати з VIN для блоків керування двигуном BMW MS43. Він може конвертувати VIN рядки у їх шістнадцяткове представлення та знаходити/замінювати VIN у бінарних файлах DME.",
+}
+
+

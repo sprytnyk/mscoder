@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..translations import TRANSLATIONS
+from ..translations import get_translations
 from ..utils import vin_to_str, vin_to_bytes
 
 # Constants
@@ -86,33 +86,31 @@ class VinConverterTab(QWidget):
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
         self.lang = lang
-        t = TRANSLATIONS[lang]
-        self.description.setText(t["conv_title"])
-        self.info.setText(t["conv_description"])
-        self.supported_label.setText(f"<b>{t['conv_supported']}</b>")
-        self.vin_label.setText(t["conv_vin_string"])
-        self.hex_label.setText(t["conv_hex_bytes"])
-        self.btn_to_hex.setText(t["conv_btn_to_hex"])
-        self.btn_to_str.setText(t["conv_btn_to_str"])
+        self.t = get_translations(lang).CONVERTER
+        self.description.setText(self.t["title"])
+        self.info.setText(self.t["description"])
+        self.supported_label.setText(f"<b>{self.t['supported']}</b>")
+        self.vin_label.setText(self.t["vin_string"])
+        self.hex_label.setText(self.t["hex_bytes"])
+        self.btn_to_hex.setText(self.t["btn_to_hex"])
+        self.btn_to_str.setText(self.t["btn_to_str"])
 
     def _to_hex(self) -> None:
         """Convert VIN string to hex bytes."""
-        t = TRANSLATIONS[self.lang]
         try:
             vin = self.vin_input.text().strip()
             if len(vin) != VIN_LENGTH:
-                self.status.setText(t["conv_error_vin_length"])
+                self.status.setText(self.t["error_vin_length"])
                 return
             data = vin_to_bytes(vin)
             hex_result = "".join(f"{b:02X}" for b in data)
             self.hex_input.setText(hex_result)
-            self.status.setText(t["conv_ok"])
+            self.status.setText(self.t["ok"])
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
     def _to_str(self) -> None:
         """Convert hex bytes to VIN string."""
-        t = TRANSLATIONS[self.lang]
         try:
             hex_text = self.hex_input.text().strip().replace(" ", "")
 
@@ -122,7 +120,7 @@ class VinConverterTab(QWidget):
 
             # Validate hex length
             if len(hex_text) != HEX_LENGTH:
-                self.status.setText(t["conv_error_hex_length"])
+                self.status.setText(self.t["error_hex_length"])
                 return
 
             # Parse hex string in pairs
@@ -132,12 +130,12 @@ class VinConverterTab(QWidget):
             vin = vin_to_str(raw)
 
             if len(vin) != VIN_LENGTH:
-                self.status.setText(t["conv_warning_decoded"].format(len(vin)))
+                self.status.setText(self.t["warning_decoded"].format(len(vin)))
             else:
-                self.status.setText(t["conv_ok"])
+                self.status.setText(self.t["ok"])
 
             self.vin_input.setText(vin)
         except ValueError:
-            self.status.setText(t["conv_error_hex_format"])
+            self.status.setText(self.t["error_hex_format"])
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")

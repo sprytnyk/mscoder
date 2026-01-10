@@ -1,11 +1,11 @@
 """Translations module for MSCoder."""
 
-from .en import TRANSLATIONS as EN_TRANSLATIONS
-from .uk import TRANSLATIONS as UK_TRANSLATIONS
+from . import en, uk
 
-TRANSLATIONS = {
-    "en": EN_TRANSLATIONS,
-    "uk": UK_TRANSLATIONS,
-}
 
-__all__ = ["TRANSLATIONS"]
+def get_translations(lang: str):
+    """Get translation module for specified language."""
+    return {"en": en, "uk": uk}.get(lang, en)
+
+
+__all__ = ["en", "uk", "get_translations"]
