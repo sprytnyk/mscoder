@@ -252,28 +252,18 @@ class IsnCopierTab(QWidget):
             # Apply immobiliser bypass if checkbox is checked
             if self.immobiliser_bypass_checkbox.isChecked():
                 # Addr 2E2F0: C2 FE B9 0A -> C2 FE 6E 0A
-                if target_data[0x2E2F0 : 0x2E2F0 + 4] == bytes(
-                    [0xC2, 0xFE, 0xB9, 0x0A]
-                ):
-                    target_data[0x2E2F0 : 0x2E2F0 + 4] = bytes([0xC2, 0xFE, 0x6E, 0x0A])
+                target_data[0x2E2F0 : 0x2E2F0 + 4] = bytes([0xC2, 0xFE, 0x6E, 0x0A])
 
                 # Addr 600D8: DA 0A 6C DD -> DA 0D F8 3B
-                if target_data[0x600D8 : 0x600D8 + 4] == bytes(
-                    [0xDA, 0x0A, 0x6C, 0xDD]
-                ):
-                    target_data[0x600D8 : 0x600D8 + 4] = bytes([0xDA, 0x0D, 0xF8, 0x3B])
+                target_data[0x600D8 : 0x600D8 + 4] = bytes([0xDA, 0x0D, 0xF8, 0x3B])
 
                 # Addr 53BF8: 00 00 FF FF FF FF FF FF -> DA 0A E4 FC 0E 1A DB 00
-                if target_data[0x53BF8 : 0x53BF8 + 8] == bytes(
-                    [0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-                ):
-                    target_data[0x53BF8 : 0x53BF8 + 8] = bytes(
-                        [0xDA, 0x0A, 0xE4, 0xFC, 0x0E, 0x1A, 0xDB, 0x00]
-                    )
+                target_data[0x53BF8 : 0x53BF8 + 8] = bytes(
+                    [0xDA, 0x0A, 0xE4, 0xFC, 0x0E, 0x1A, 0xDB, 0x00]
+                )
 
                 # Addr 70A6E: 02 -> 00
-                if target_data[0x70A6E] == 0x02:
-                    target_data[0x70A6E] = 0x00
+                target_data[0x70A6E] = 0x00
 
             # Revert immobiliser bypass if checkbox is checked and visible
             if (
@@ -281,28 +271,18 @@ class IsnCopierTab(QWidget):
                 and self.immobiliser_revert_checkbox.isVisible()
             ):
                 # Addr 2E2F0: C2 FE 6E 0A -> C2 FE B9 0A
-                if target_data[0x2E2F0 : 0x2E2F0 + 4] == bytes(
-                    [0xC2, 0xFE, 0x6E, 0x0A]
-                ):
-                    target_data[0x2E2F0 : 0x2E2F0 + 4] = bytes([0xC2, 0xFE, 0xB9, 0x0A])
+                target_data[0x2E2F0 : 0x2E2F0 + 4] = bytes([0xC2, 0xFE, 0xB9, 0x0A])
 
                 # Addr 600D8: DA 0D F8 3B -> DA 0A 6C DD
-                if target_data[0x600D8 : 0x600D8 + 4] == bytes(
-                    [0xDA, 0x0D, 0xF8, 0x3B]
-                ):
-                    target_data[0x600D8 : 0x600D8 + 4] = bytes([0xDA, 0x0A, 0x6C, 0xDD])
+                target_data[0x600D8 : 0x600D8 + 4] = bytes([0xDA, 0x0A, 0x6C, 0xDD])
 
                 # Addr 53BF8: DA 0A E4 FC 0E 1A DB 00 -> 00 00 FF FF FF FF FF FF
-                if target_data[0x53BF8 : 0x53BF8 + 8] == bytes(
-                    [0xDA, 0x0A, 0xE4, 0xFC, 0x0E, 0x1A, 0xDB, 0x00]
-                ):
-                    target_data[0x53BF8 : 0x53BF8 + 8] = bytes(
-                        [0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-                    )
+                target_data[0x53BF8 : 0x53BF8 + 8] = bytes(
+                    [0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+                )
 
                 # Addr 70A6E: 00 -> 02
-                if target_data[0x70A6E] == 0x00:
-                    target_data[0x70A6E] = 0x02
+                target_data[0x70A6E] = 0x02
 
             # Save modified target file
             new_file_path = self._get_modified_filepath(target_path)
@@ -311,6 +291,10 @@ class IsnCopierTab(QWidget):
 
             hex_value = "".join(f"{b:02X}" for b in isn_bytes)
             self.status.setText(self.t["success"].format(hex_value, new_file_path))
+            
+            # Clear checkbox states after successful processing
+            self.immobiliser_bypass_checkbox.setChecked(False)
+            self.immobiliser_revert_checkbox.setChecked(False)
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
