@@ -15,9 +15,19 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence
 
-from . import __version__, __author__
-from .translations import get_translations
-from .tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
+# Handle both direct execution and module execution
+try:
+    from . import __version__, __author__
+    from .translations import get_translations
+    from .tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
+except ImportError:
+    # Direct execution fallback
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from mscoder import __version__, __author__
+    from mscoder.translations import get_translations
+    from mscoder.tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
 
 # Constants
 BASE_DIR = Path(__file__).resolve().parent.parent
