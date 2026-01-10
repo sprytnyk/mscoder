@@ -11,14 +11,14 @@ jobs:
         os: [ubuntu-22.04, macos-14, windows-2022]
         include:
           - os: ubuntu-22.04
-            artifact_name: vincoder-linux-x64
-            output_path: dist/vincoder
+            artifact_name: mscoder-linux-x64
+            output_path: dist/mscoder
           - os: macos-14
-            artifact_name: vincoder-macos-x64
-            output_path: dist/vincoder
+            artifact_name: mscoder-macos-x64
+            output_path: dist/mscoder
           - os: windows-2022
-            artifact_name: vincoder-windows-x64.exe
-            output_path: dist/vincoder.exe
+            artifact_name: mscoder-windows-x64.exe
+            output_path: dist/mscoder.exe
 
     steps:
     - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        pyinstaller vincoder.spec
+        pyinstaller mscoder.spec
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

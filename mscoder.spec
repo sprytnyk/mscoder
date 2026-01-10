@@ -6,7 +6,7 @@ datas = [
 ]
 
 a = Analysis(
-    ["main.py"],
+    ["mscoder/__main__.py"],
     pathex=[],
     binaries=[],
     datas=datas,
@@ -26,7 +26,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="vincoder",
+    name="mscoder",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

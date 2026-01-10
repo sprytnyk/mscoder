@@ -10,4 +10,4 @@ clean:
 	find . -type f -name "*.spec~" -delete
 
 build:
-	pyinstaller vincoder.spec
+	pyinstaller mscoder.spec

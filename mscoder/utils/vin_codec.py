@@ -23,7 +23,7 @@ def vin_to_str(vin: bytes) -> str:
     """
     Convert VIN bytes to string representation.
 
-    This decodes the proprietary VIN encoding used in BMW MS41/MS43 DMEs.
+    This decodes the proprietary VIN encoding used in BMW MS43 DMEs.
 
     Args:
         vin: Raw VIN bytes (13 bytes)
@@ -45,7 +45,7 @@ def vin_to_bytes(vin: str) -> bytes:
     """
     Convert VIN string to bytes representation.
 
-    This encodes a standard VIN into the proprietary format used in BMW MS41/MS43 DMEs.
+    This encodes a standard VIN into the proprietary format used in BMW MS43 DMEs.
 
     Args:
         vin: 17-character VIN string
