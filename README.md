@@ -10,11 +10,11 @@ This tool helps you work with VIN & ISN data for BMW MS4X engine control units. 
 ## Features
 
 - **VIN Replacer** (`Alt+1`): Replace VIN in MS41, MS42, and MS43 binary DME files
-![Replacer](assets/replacer.png)
+![Replacer](assets/mscoder/replacer.png)
 - **VIN Converter** (`Alt+2`): Convert between VIN string and hex bytes
-![Converter](assets/converter.png)
+![Converter](assets/mscoder/converter.png)
 - **ISN Copier** (`Alt+3`): Copy ISN (Immobilizer Sequence Number) between MS42 and MS43 firmware files, with optional IMMO bypass functionality
-![Copier](assets/copier.png)
+![Copier](assets/mscoder/copier.png)
 - **About** (`Alt+4`): Application information and credits
 
 ## Compatibility
@@ -41,7 +41,7 @@ IMMO bypass is supported for:
 - Does **NOT** require checksum correction in MS4X Flasher
 - After flashing, VIN + ISN must be synced with EWS using INPA
 
-![Updated VIN](assets/updated-vin.jpg)
+![Updated VIN](assets/examples/updated-vin.jpg)
 
 #### Example of sync for MS43:
 
@@ -68,7 +68,7 @@ Press F1, then click Ok:
 - Allows the car to start without matching VIN + EWS ISN
 - **⚠️ CRITICAL: Requires checksum correction in MS4X Flasher after using this feature. Car will not start without proper checksum correction!**
 
-![Checksum Correction](assets/checksum-correction.png)
+![Checksum Correction](assets/examples/checksum-correction.png)
 
 ### Tested Configurations
 
