@@ -60,7 +60,7 @@ class MSCoder(QMainWindow):
     def _init_ui(self) -> None:
         """Initialize UI components."""
         self.setWindowTitle(get_translations(self.current_lang).COMMON["window_title"])
-        self.resize(650, 500)  # Set default window size
+        self.resize(750, 550)  # Set default window size
 
         # Create central widget
         central_widget = QWidget()
