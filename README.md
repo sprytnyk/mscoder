@@ -9,12 +9,13 @@ This tool helps you work with VIN & ISN data for BMW MS4X engine control units. 
 
 ## Features
 
-- **VIN Replacer**: Replace VIN in MS41, MS42, and MS43 binary DME files
+- **VIN Replacer** (`Alt+1`): Replace VIN in MS41, MS42, and MS43 binary DME files
 ![Replacer](assets/replacer.png)
-- **VIN Converter**: Convert between VIN string and hex bytes
+- **VIN Converter** (`Alt+2`): Convert between VIN string and hex bytes
 ![Converter](assets/converter.png)
-- **ISN Copier**: Copy ISN (Immobilizer Sequence Number) between MS42 and MS43 firmware files, with optional IMMO bypass functionality
+- **ISN Copier** (`Alt+3`): Copy ISN (Immobilizer Sequence Number) between MS42 and MS43 firmware files, with optional IMMO bypass functionality
 ![Copier](assets/copier.png)
+- **About** (`Alt+4`): Application information and credits
 
 ## Compatibility
 
