@@ -155,7 +155,8 @@ class VinReplacerTab(QWidget):
             with open(new_file_path, "wb") as f:
                 f.write(data)
 
-            self.status.setText(self.t["success"].format(occurrences, new_file_path))
+            filename = Path(new_file_path).name
+            self.status.setText(self.t["success"].format(occurrences, filename))
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
