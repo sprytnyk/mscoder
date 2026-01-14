@@ -2,9 +2,11 @@
 
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -16,36 +18,74 @@ from PySide6.QtWidgets import (
 
 from ..translations import get_translations
 
-# Constants
+# UI Constants
 INPUT_HEIGHT = 30
-ISN_ADDRESS = 0x3ED4
-ISN_LENGTH = 6
-ISN_PADDING_SIZE = 76
 
-# Immobiliser bypass patch addresses and values
-IMMOBILISER_PATCHES = [
-    {
-        "address": 0x2E2F0,
-        "original": bytes([0xC2, 0xFE, 0xB9, 0x0A]),
-        "patched": bytes([0xC2, 0xFE, 0x6E, 0x0A]),
+# Binary data constants
+ISN_LENGTH = 6
+VERSION_LENGTH = 6
+PADDING_BYTE = 0xFF
+
+# DME Configurations
+DME_CONFIGS = {
+    "MS42": {
+        "isn_address": 0x3EDE,
+        "immo_padding_size": 66,
+        "min_firmware_size": 0x481A5,
+        "version_check_offset": 0x48042,
+        "version_check_value": "0110C6",
+        "immobiliser_patches": [
+            {
+                "address": 0x283BA,
+                "original": bytes(
+                    [0x88, 0x90, 0x88, 0x60, 0x8A, 0x0E, 0x02, 0xF0, 0xEA, 0x00]
+                ),
+                "patched": bytes(
+                    [0xDA, 0x07, 0xC8, 0x59, 0xFE, 0x0E, 0x2E, 0x0F, 0xDB, 0x00]
+                ),
+            },
+            {
+                "address": 0x481A4,
+                "original": bytes([0x02]),
+                "patched": bytes([0x00]),
+            },
+            {
+                "address": 0x29E8A,
+                "original": bytes([0xC2, 0xFE, 0xE9, 0x01]),
+                "patched": bytes([0xC2, 0xFE, 0xA4, 0x01]),
+            },
+        ],
     },
-    {
-        "address": 0x600D8,
-        "original": bytes([0xDA, 0x0A, 0x6C, 0xDD]),
-        "patched": bytes([0xDA, 0x0D, 0xF8, 0x3B]),
+    "MS43": {
+        "isn_address": 0x3ED4,
+        "immo_padding_size": 76,
+        "min_firmware_size": 0x70A6F,
+        "version_check_offset": 0x70042,
+        "version_check_value": "430069",
+        "immobiliser_patches": [
+            {
+                "address": 0x2E2F0,
+                "original": bytes([0xC2, 0xFE, 0xB9, 0x0A]),
+                "patched": bytes([0xC2, 0xFE, 0x6E, 0x0A]),
+            },
+            {
+                "address": 0x600D8,
+                "original": bytes([0xDA, 0x0A, 0x6C, 0xDD]),
+                "patched": bytes([0xDA, 0x0D, 0xF8, 0x3B]),
+            },
+            {
+                "address": 0x53BF8,
+                "original": bytes([0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
+                "patched": bytes([0xDA, 0x0A, 0xE4, 0xFC, 0x0E, 0x1A, 0xDB, 0x00]),
+            },
+            {
+                "address": 0x70A6E,
+                "original": bytes([0x02]),
+                "patched": bytes([0x00]),
+            },
+        ],
     },
-    {
-        "address": 0x53BF8,
-        "original": bytes([0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]),
-        "patched": bytes([0xDA, 0x0A, 0xE4, 0xFC, 0x0E, 0x1A, 0xDB, 0x00]),
-    },
-    {
-        "address": 0x70A6E,
-        "original": bytes([0x02]),
-        "patched": bytes([0x00])
-    },
-]
-MIN_FIRMWARE_SIZE = 0x70A6F
+}
 
 # Styling constants
 STYLE_TITLE = "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
@@ -58,11 +98,18 @@ class IsnCopierTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.lang = "en"
+        self.t = None
         self._init_ui()
         self.update_language("en")
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
+        # DME selector
+        self.dme_selector = QComboBox()
+        self.dme_selector.addItems(["MS42", "MS43"])
+        self.dme_selector.setCurrentText("MS43")
+        self.dme_selector.setFixedHeight(INPUT_HEIGHT)
+
         # Input fields
         self.source_file_input = QLineEdit()
         self.source_file_input.setReadOnly(True)
@@ -72,7 +119,6 @@ class IsnCopierTab(QWidget):
         self.isn_value_display.setReadOnly(True)
         self.status = QLabel()
         self.status.setWordWrap(True)
-        self.status.setMaximumWidth(600)
 
         self.source_file_input.setFixedHeight(INPUT_HEIGHT)
         self.target_file_input.setFixedHeight(INPUT_HEIGHT)
@@ -102,9 +148,7 @@ class IsnCopierTab(QWidget):
         self.info.setWordWrap(True)
         self.info.setStyleSheet(STYLE_INFO)
 
-        self.ms43_warning = QLabel()
-        self.ms43_warning.setStyleSheet("margin-bottom: 10px;")
-
+        self.dme_type_label = QLabel()
         self.source_label = QLabel()
         self.target_label = QLabel()
         self.isn_label = QLabel()
@@ -113,7 +157,8 @@ class IsnCopierTab(QWidget):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.description)
         self.layout.addWidget(self.info)
-        self.layout.addWidget(self.ms43_warning)
+        self.layout.addWidget(self.dme_type_label)
+        self.layout.addWidget(self.dme_selector)
         self.layout.addWidget(self.source_label)
 
         source_row = QHBoxLayout()
@@ -144,7 +189,7 @@ class IsnCopierTab(QWidget):
         self.t = get_translations(lang).ISN_COPIER
         self.description.setText(self.t["title"])
         self.info.setText(self.t["description"])
-        self.ms43_warning.setText(f"<b style='color: red;'>{self.t['ms43_only']}</b>")
+        self.dme_type_label.setText(self.t.get("dme_type", "DME Type:"))
         self.source_label.setText(self.t["source_file"])
         self.target_label.setText(self.t["target_file"])
         self.isn_label.setText(self.t["value_label"])
@@ -170,57 +215,158 @@ class IsnCopierTab(QWidget):
         )
         if file_path:
             self.target_file_input.setText(file_path)
-            self._check_bypass_state(file_path)
+            self._update_bypass_options(file_path)
             self.status.setText(self.t["target_selected"])
 
-    def _check_bypass_state(self, file_path: str) -> None:
-        """Check if immobiliser bypass is applied and show/hide checkboxes accordingly."""
+    def _read_file_data(self, file_path: str) -> Optional[bytes]:
+        """Read binary file data.
+
+        Returns:
+            File content as bytes, or None if reading fails
+        """
         try:
             with open(file_path, "rb") as f:
-                data = f.read()
+                return f.read()
+        except (OSError, IOError):
+            return None
 
-            # Check if file is large enough
-            if len(data) < MIN_FIRMWARE_SIZE:
-                self.immobiliser_bypass_checkbox.hide()
-                self.immobiliser_revert_checkbox.hide()
+    def _is_file_large_enough(self, data: bytes, required_size: int) -> bool:
+        """Check if file data meets minimum size requirement."""
+        return len(data) >= required_size
+
+    def _extract_version_string(self, data: bytes, offset: int) -> str:
+        """Extract version string from binary data at given offset."""
+        version_bytes = data[offset : offset + VERSION_LENGTH]
+        return version_bytes.decode("ascii", errors="ignore")
+
+    def _check_version_compatibility(self, file_path: str) -> bool:
+        """Check if the target file has compatible software version for bypass.
+
+        Returns:
+            True if version is compatible, False otherwise
+        """
+        try:
+            config = self._get_dme_config()
+            version_offset = config.get("version_check_offset")
+            expected_version = config.get("version_check_value")
+
+            if not version_offset or not expected_version:
+                return False
+
+            data = self._read_file_data(file_path)
+            if data is None:
+                return False
+
+            min_size = version_offset + VERSION_LENGTH
+            if not self._is_file_large_enough(data, min_size):
+                return False
+
+            version_string = self._extract_version_string(data, version_offset)
+            return version_string == expected_version
+
+        except Exception:
+            return False
+
+    def _is_bypass_applied(self, data: bytes, patches: list) -> bool:
+        """Check if immobiliser bypass patches are already applied.
+
+        Returns:
+            True if any patch is applied, False otherwise
+        """
+        return any(
+            data[patch["address"] : patch["address"] + len(patch["patched"])]
+            == patch["patched"]
+            for patch in patches
+        )
+
+    def _hide_all_bypass_options(self) -> None:
+        """Hide both bypass checkboxes."""
+        self.immobiliser_bypass_checkbox.hide()
+        self.immobiliser_revert_checkbox.hide()
+
+    def _show_bypass_option(self) -> None:
+        """Show bypass checkbox, hide revert."""
+        self.immobiliser_bypass_checkbox.show()
+        self.immobiliser_revert_checkbox.hide()
+
+    def _show_revert_option(self) -> None:
+        """Show revert checkbox, hide bypass."""
+        self.immobiliser_bypass_checkbox.hide()
+        self.immobiliser_revert_checkbox.show()
+
+    def _update_bypass_options(self, file_path: str) -> None:
+        """Update bypass/revert checkbox visibility based on file state."""
+        try:
+            config = self._get_dme_config()
+            data = self._read_file_data(file_path)
+
+            if data is None:
+                self._hide_all_bypass_options()
                 return
 
-            # Check if bypass is applied by looking for patched values
-            bypass_applied = any(
-                data[patch["address"] : patch["address"] + len(patch["patched"])]
-                == patch["patched"]
-                for patch in IMMOBILISER_PATCHES
-            )
+            # Validate file size
+            if not self._is_file_large_enough(data, config["min_firmware_size"]):
+                self._hide_all_bypass_options()
+                return
 
-            if bypass_applied:
-                self.immobiliser_bypass_checkbox.hide()
-                self.immobiliser_revert_checkbox.show()
+            # Validate software version
+            if not self._check_version_compatibility(file_path):
+                self._hide_all_bypass_options()
+                return
+
+            # Determine if bypass is already applied
+            if self._is_bypass_applied(data, config["immobiliser_patches"]):
+                self._show_revert_option()
             else:
-                self.immobiliser_bypass_checkbox.show()
-                self.immobiliser_revert_checkbox.hide()
+                self._show_bypass_option()
+
         except Exception:
-            self.immobiliser_bypass_checkbox.show()
-            self.immobiliser_revert_checkbox.show()
+            self._hide_all_bypass_options()
+
+    def _bytes_to_hex_string(self, data: bytes) -> str:
+        """Convert bytes to uppercase hex string."""
+        return "".join(f"{b:02X}" for b in data)
 
     def _read_isn_value(self, file_path: str) -> None:
         """Read ISN value from source file and display it."""
         try:
-            with open(file_path, "rb") as f:
-                f.seek(ISN_ADDRESS)
-                isn_bytes = f.read(ISN_LENGTH)
-
-                if len(isn_bytes) < ISN_LENGTH:
-                    self.status.setText(self.t["error_file_too_small"])
-                    self.isn_value_display.setText("")
-                    return
-
-                # Display as hex string
-                hex_value = "".join(f"{b:02X}" for b in isn_bytes)
+            isn_bytes = self._read_isn_from_source(file_path)
+            if isn_bytes:
+                hex_value = self._bytes_to_hex_string(isn_bytes)
                 self.isn_value_display.setText(hex_value)
                 self.status.setText(self.t["source_selected"])
+            else:
+                self.isn_value_display.setText("")
+                self.status.setText(self.t["error_file_too_small"])
+        except (OSError, IOError) as e:
+            self.status.setText(f"Error reading file: {str(e)}")
+            self.isn_value_display.setText("")
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
             self.isn_value_display.setText("")
+
+    def _read_isn_from_source(self, file_path: str) -> Optional[bytes]:
+        """Read ISN bytes from file at configured address.
+
+        Returns:
+            ISN bytes if successful, None if file is too small
+        """
+        config = self._get_dme_config()
+        with open(file_path, "rb") as f:
+            f.seek(config["isn_address"])
+            isn_bytes = f.read(ISN_LENGTH)
+            return isn_bytes if len(isn_bytes) == ISN_LENGTH else None
+
+    def _validate_file_paths(self, source_path: str, target_path: str) -> bool:
+        """Validate that both file paths are provided.
+
+        Returns:
+            True if both paths are valid, False otherwise
+        """
+        if not source_path or not target_path:
+            self.status.setText(self.t["error_required"])
+            return False
+        return True
 
     def _process_files(self) -> None:
         """Copy ISN value from source to target file."""
@@ -228,8 +374,7 @@ class IsnCopierTab(QWidget):
             source_path = self.source_file_input.text().strip()
             target_path = self.target_file_input.text().strip()
 
-            if not source_path or not target_path:
-                self.status.setText(self.t["error_required"])
+            if not self._validate_file_paths(source_path, target_path):
                 return
 
             isn_bytes = self._read_isn_from_file(source_path)
@@ -243,70 +388,110 @@ class IsnCopierTab(QWidget):
             self._apply_immobiliser_patches(target_data)
             self._save_modified_file(target_path, target_data, isn_bytes)
 
+        except (OSError, IOError) as e:
+            self.status.setText(f"File error: {str(e)}")
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
-    def _read_isn_from_file(self, file_path: str) -> bytes | None:
-        """Read ISN value from source file. Returns None on error."""
-        with open(file_path, "rb") as f:
-            f.seek(ISN_ADDRESS)
-            isn_bytes = f.read(ISN_LENGTH)
+    def _read_isn_from_file(self, file_path: str) -> Optional[bytes]:
+        """Read ISN value from source file.
 
-            if len(isn_bytes) < ISN_LENGTH:
-                self.status.setText(self.t["error_file_too_small"])
-                return None
+        Returns:
+            ISN bytes if successful, None on error
+        """
+        isn_bytes = self._read_isn_from_source(file_path)
+        if isn_bytes is None:
+            self.status.setText(self.t["error_file_too_small"])
+        return isn_bytes
 
-            return isn_bytes
+    def _fill_immo_area(self, data: bytearray, address: int, size: int) -> None:
+        """Fill immobiliser area with padding bytes."""
+        data[address : address + size] = bytes([PADDING_BYTE] * size)
+
+    def _write_isn_to_data(
+        self, data: bytearray, address: int, isn_bytes: bytes
+    ) -> None:
+        """Write ISN bytes to data at specified address."""
+        data[address : address + ISN_LENGTH] = isn_bytes
 
     def _load_and_prepare_target(
         self, file_path: str, isn_bytes: bytes
-    ) -> bytearray | None:
-        """Load target file and write ISN value. Returns None on error."""
-        with open(file_path, "rb") as f:
-            target_data = bytearray(f.read())
+    ) -> Optional[bytearray]:
+        """Load target file and write ISN value.
 
-        if len(target_data) < ISN_ADDRESS + ISN_PADDING_SIZE:
+        Returns:
+            Modified data as bytearray, or None on error
+        """
+        config = self._get_dme_config()
+        data = self._read_file_data(file_path)
+
+        if data is None:
+            self.status.setText("Error reading target file")
+            return None
+
+        target_data = bytearray(data)
+        isn_address = config["isn_address"]
+        padding_size = config["immo_padding_size"]
+
+        if not self._is_file_large_enough(target_data, isn_address + padding_size):
             self.status.setText(self.t["error_target_too_small"])
             return None
 
-        # Fill 76 bytes with 0xFF starting at ISN_ADDRESS
-        target_data[ISN_ADDRESS : ISN_ADDRESS + ISN_PADDING_SIZE] = bytes(
-            [0xFF] * ISN_PADDING_SIZE
-        )
-
-        # Write ISN to target (overwrites first 6 bytes)
-        target_data[ISN_ADDRESS : ISN_ADDRESS + ISN_LENGTH] = isn_bytes
+        self._fill_immo_area(target_data, isn_address, padding_size)
+        self._write_isn_to_data(target_data, isn_address, isn_bytes)
 
         return target_data
 
-    def _apply_immobiliser_patches(self, target_data: bytearray) -> None:
-        """Apply or revert immobiliser bypass patches."""
-        if not (
+    def _should_apply_patches(self) -> bool:
+        """Check if any immobiliser patches should be applied."""
+        return (
             self.immobiliser_bypass_checkbox.isChecked()
             or self.immobiliser_revert_checkbox.isChecked()
-        ):
+        )
+
+    def _apply_patches(
+        self, target_data: bytearray, patches: list, patch_type: str
+    ) -> None:
+        """Apply a list of patches to target data.
+
+        Args:
+            target_data: Data to modify
+            patches: List of patch dictionaries
+            patch_type: Either 'patched' or 'original'
+        """
+        for patch in patches:
+            addr = patch["address"]
+            data = patch[patch_type]
+            target_data[addr : addr + len(data)] = data
+
+    def _apply_immobiliser_patches(self, target_data: bytearray) -> None:
+        """Apply or revert immobiliser bypass patches."""
+        if not self._should_apply_patches():
             return
 
-        if len(target_data) < MIN_FIRMWARE_SIZE:
+        config = self._get_dme_config()
+        min_size = config["min_firmware_size"]
+
+        if not self._is_file_large_enough(target_data, min_size):
             self.status.setText(
-                f"Error: Firmware too small for immobiliser bypass (need at least {MIN_FIRMWARE_SIZE} bytes)"
+                f"Error: Firmware too small for immobiliser bypass (need at least {min_size} bytes)"
             )
             return
 
-        if self.immobiliser_bypass_checkbox.isChecked():
-            for patch in IMMOBILISER_PATCHES:
-                addr = patch["address"]
-                data = patch["patched"]
-                target_data[addr : addr + len(data)] = data
+        patches = config["immobiliser_patches"]
 
+        if self.immobiliser_bypass_checkbox.isChecked():
+            self._apply_patches(target_data, patches, "patched")
         elif (
             self.immobiliser_revert_checkbox.isChecked()
             and self.immobiliser_revert_checkbox.isVisible()
         ):
-            for patch in IMMOBILISER_PATCHES:
-                addr = patch["address"]
-                data = patch["original"]
-                target_data[addr : addr + len(data)] = data
+            self._apply_patches(target_data, patches, "original")
+
+    def _clear_bypass_selections(self) -> None:
+        """Clear all bypass checkbox selections."""
+        self.immobiliser_bypass_checkbox.setChecked(False)
+        self.immobiliser_revert_checkbox.setChecked(False)
 
     def _save_modified_file(
         self, original_path: str, target_data: bytearray, isn_bytes: bytes
@@ -316,16 +501,22 @@ class IsnCopierTab(QWidget):
         with open(new_file_path, "wb") as f:
             f.write(target_data)
 
-        hex_value = "".join(f"{b:02X}" for b in isn_bytes)
-        self.status.setText(self.t["success"].format(hex_value, new_file_path))
+        hex_value = self._bytes_to_hex_string(isn_bytes)
+        filename = Path(new_file_path).name
+        self.status.setText(self.t["success"].format(hex_value, filename))
 
-        # Clear checkbox states after successful processing
-        self.immobiliser_bypass_checkbox.setChecked(False)
-        self.immobiliser_revert_checkbox.setChecked(False)
+        self._clear_bypass_selections()
+
+    def _get_dme_config(self) -> dict:
+        """Get the configuration for the currently selected DME type."""
+        dme_type = self.dme_selector.currentText()
+        return DME_CONFIGS[dme_type]
 
     @staticmethod
     def _get_modified_filepath(original_path: str) -> str:
         """Generate modified file path with datetime suffix."""
         path = Path(original_path)
         timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
-        return str(path.parent / f"{path.stem}_{timestamp}{path.suffix}")
+        new_filename = f"{path.stem}_{timestamp}{path.suffix}"
+        new_path = path.parent / new_filename
+        return str(new_path)

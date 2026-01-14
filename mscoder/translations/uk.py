@@ -32,9 +32,9 @@ REPLACER = {
     "description": "Знайти та замінити VIN HEX у бінарному файлі. Змінений файл буде збережено з UTC datetime суфіксом.",
     "original_vin": "Оригінальний VIN (рядок):",
     "replace_vin": "VIN для заміни (рядок):",
-    "binary_file": "Бінарний файл:",
+    "binary_file": "Бінарний файл (512kb для MS42/MS43, 256kb для MS41):",
     "btn_select": "Вибрати файл",
-    "btn_process": "Знайти та замінити у файлі",
+    "btn_process": "Оновити VIN",
     "select_file_title": "Виберіть бінарний файл",
     "all_files": "Всі файли (*.*)",
     "file_selected": "Файл вибрано",
@@ -49,7 +49,7 @@ REPLACER = {
 # ISN Copier tab
 ISN_COPIER = {
     "title": "Копіювання ISN",
-    "description": "Копіювати значення ISN з одного файлу прошивки в інший. ISN розташований за адресою 0x3ED4 (6 байтів).",
+    "description": "Копіювати значення ISN з одного файлу прошивки в інший (файли 512kb для MS42/MS43). ISN це 6 байтів за різними адресами залежно від типу DME.",
     "source_file": "Вхідний файл (зчитати ISN з):",
     "target_file": "Кінцевий файл (записати ISN в):",
     "value_label": "Значення ISN з вхідного файлу:",
@@ -64,16 +64,14 @@ ISN_COPIER = {
     "error_file_too_small": "Помилка: Вхідний файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
     "error_target_too_small": "Помилка: Кінцевий файл занадто малий (потрібна адреса 0x3ED4 + 6 байтів)",
     "success": "Успішно: значення ISN {0} скопійовано в кінцевий файл. Збережено у: {1}",
-    "ms43_only": "Цей функціонал виключно для MS43",
     "immobiliser_bypass": "Вимкнення імобілайзера",
     "immobiliser_revert": "Відновити імобілайзер",
 }
 
 # About tab
 ABOUT = {
-    "title": "MS43 MSCoder",
+    "title": "MSCoder",
     "author": 'Автор: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
     "version": "Версія: {version}",
     "header": "Про програму",
-    "description": "Цей інструмент допомагає працювати з VIN для блоків керування двигуном BMW MS43. Він може конвертувати VIN рядки у їх шістнадцяткове представлення та знаходити/замінювати VIN у бінарних файлах DME.",
 }

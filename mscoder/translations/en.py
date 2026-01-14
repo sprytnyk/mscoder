@@ -32,9 +32,9 @@ REPLACER = {
     "description": "Find and replace VIN hex patterns in binary files. The modified file will be saved with a UTC datetime suffix.",
     "original_vin": "Original VIN (string):",
     "replace_vin": "Replacement VIN (string):",
-    "binary_file": "Binary file:",
+    "binary_file": "Binary file (512kb for MS42/MS43, 256kb for MS41):",
     "btn_select": "Select File",
-    "btn_process": "Find and Replace in File",
+    "btn_process": "Update VIN",
     "select_file_title": "Select Binary File",
     "all_files": "All Files (*.*)",
     "file_selected": "File selected",
@@ -49,7 +49,7 @@ REPLACER = {
 # ISN Copier tab
 ISN_COPIER = {
     "title": "ISN Copier",
-    "description": "Copy ISN value from one firmware file to another. The ISN is located at address 0x3ED4 (6 bytes).",
+    "description": "Copy ISN value from one firmware file to another (512kb files for MS42/MS43). The ISN is 6 bytes located at different addresses depending on DME type.",
     "source_file": "Source file (read ISN from):",
     "target_file": "Target file (write ISN to):",
     "value_label": "ISN value from source:",
@@ -64,16 +64,14 @@ ISN_COPIER = {
     "error_file_too_small": "Error: Source file is too small (address 0x3ED4 + 6 bytes required)",
     "error_target_too_small": "Error: Target file is too small (address 0x3ED4 + 6 bytes required)",
     "success": "Success: ISN value {0} copied to target file. Saved to: {1}",
-    "ms43_only": "This functionality is solely for MS43",
     "immobiliser_bypass": "Immobiliser bypass",
     "immobiliser_revert": "Revert immobiliser bypass",
 }
 
 # About tab
 ABOUT = {
-    "title": "MS43 MSCoder",
+    "title": "MSCoder",
     "author": 'Author: <a href="https://sprytnyk.dev">https://sprytnyk.dev</a><br>GitHub: <a href="https://github.com/sprytnyk/mscoder">https://github.com/sprytnyk/mscoder</a>',
     "version": "Version: {version}",
     "header": "About",
-    "description": "This tool helps you work with VIN data for BMW MS43 engine control units. It can convert VIN strings to their hexadecimal representation and find/replace VINs in binary DME files.",
 }

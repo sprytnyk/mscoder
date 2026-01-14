@@ -24,14 +24,16 @@ except ImportError:
     # Direct execution fallback
     import sys
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from mscoder import __version__, __author__
     from mscoder.translations import get_translations
     from mscoder.tabs import VinConverterTab, VinReplacerTab, IsnCopierTab, AboutTab
 
+
 def get_assets_dir():
     """Get assets directory, handling both dev and PyInstaller environments."""
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         # Running as compiled executable
         base = Path(sys._MEIPASS)
     else:
@@ -39,6 +41,7 @@ def get_assets_dir():
         base = Path(__file__).resolve().parent.parent
 
     return base
+
 
 # Constants
 ASSETS_DIR = get_assets_dir()

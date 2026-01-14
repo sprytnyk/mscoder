@@ -44,11 +44,6 @@ class AboutTab(QWidget):
         self.desc_title.setStyleSheet(STYLE_TITLE + " margin-top: 10px;")
         self.layout.addWidget(self.desc_title)
 
-        self.description = QLabel()
-        self.description.setWordWrap(True)
-        self.description.setStyleSheet("margin-bottom: 20px;")
-        self.layout.addWidget(self.description)
-
         # Add stretch to push content to top
         self.layout.addStretch()
 
@@ -63,5 +58,3 @@ class AboutTab(QWidget):
         self.title.setText(self.t["title"])
         self.author.setText(self.t["author"])
         self.version.setText(self.t["version"].format(version=__version__))
-        self.desc_title.setText(self.t["header"])
-        self.description.setText(self.t["description"])
