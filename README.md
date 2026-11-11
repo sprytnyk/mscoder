@@ -84,6 +84,8 @@ This tool has been tested and proven to work on real hardware:
 
 Download pre-built binaries for different distributions from the [Releases](https://github.com/sprytnyk/mscoder/releases) page.
 
+On Linux, unpack `mscoder-linux-x64.tar.gz` and run `./mscoder`.
+
 On macOS, pick `macos-arm64` for Apple Silicon or `macos-x64` for Intel, and drag
 `MSCoder.app` into Applications. The app isn't notarized, so macOS blocks it the first
 time. Try to open it, then go to System Settings, open Privacy & Security and click Open
