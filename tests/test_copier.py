@@ -264,3 +264,20 @@ def test_switching_the_dme_type_checks_the_files_again(tab, choose_file, tmp_pat
 
     [out] = copy(tab, tmp_path)
     assert sorted(changed_offsets(with_isn("MS42", target_data, ms42_isn), out.read_bytes())) == []
+
+
+@pytest.mark.parametrize("dme", DMES)
+@pytest.mark.parametrize("problem", ["too small", "wrong version"])
+def test_bypass_is_checked_again_when_copying(tab, choose_file, tmp_path, dme, problem):
+    # the target changes on disk between choosing it and copying
+    tab.dme_selector.setCurrentText(dme)
+    target = save(tmp_path, "target.bin", firmware(dme))
+    pick(tab, choose_file, source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)), target=target)
+    tab.immobiliser_bypass_checkbox.setChecked(True)
+    if problem == "too small":
+        target.write_bytes(firmware(dme, size=DME_CONFIGS[dme]["min_firmware_size"] - 1))
+    else:
+        target.write_bytes(firmware(dme, version="999999"))
+
+    assert copy(tab, tmp_path) == []
+    assert tab.status.text() == T["error_bypass_unsupported"]

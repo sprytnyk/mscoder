@@ -401,7 +401,8 @@ class IsnCopierTab(QWidget):
             if target_data is None:
                 return
 
-            self._apply_immobiliser_patches(target_data)
+            if not self._apply_immobiliser_patches(target_data):
+                return
             self._save_modified_file(target_path, target_data, isn_bytes)
 
         except (OSError, IOError) as e:
@@ -480,29 +481,36 @@ class IsnCopierTab(QWidget):
             data = patch[patch_type]
             target_data[addr : addr + len(data)] = data
 
-    def _apply_immobiliser_patches(self, target_data: bytearray) -> None:
-        """Apply or revert immobiliser bypass patches."""
-        if not self._should_apply_patches():
-            return
-
+    def _bypass_fits(self, data: bytes, applied: bool) -> bool:
+        """Whether the data can take the bypass, or its revert when applied is True."""
         config = self._get_dme_config()
-        min_size = config["min_firmware_size"]
+        offset = config["version_check_offset"]
+        return (
+            self._is_file_large_enough(data, config["min_firmware_size"])
+            and self._extract_version_string(data, offset)
+            == config["version_check_value"]
+            and self._is_bypass_applied(data, config["immobiliser_patches"]) == applied
+        )
 
-        if not self._is_file_large_enough(target_data, min_size):
-            self.status.setText(
-                f"Error: Firmware too small for immobiliser bypass (need at least {min_size} bytes)"
-            )
-            return
+    def _apply_immobiliser_patches(self, target_data: bytearray) -> bool:
+        """Apply or revert immobiliser bypass patches.
 
-        patches = config["immobiliser_patches"]
+        This checks the file again, since it may have changed after the user chose it.
 
-        if self.immobiliser_bypass_checkbox.isChecked():
-            self._apply_patches(target_data, patches, "patched")
-        elif (
-            self.immobiliser_revert_checkbox.isChecked()
-            and self.immobiliser_revert_checkbox.isVisible()
-        ):
-            self._apply_patches(target_data, patches, "original")
+        Returns:
+            False, with nothing changed, if the file can't take the patches
+        """
+        if not self._should_apply_patches():
+            return True
+
+        revert = not self.immobiliser_bypass_checkbox.isChecked()
+        if not self._bypass_fits(target_data, applied=revert):
+            self.status.setText(self.t["error_bypass_unsupported"])
+            return False
+
+        patches = self._get_dme_config()["immobiliser_patches"]
+        self._apply_patches(target_data, patches, "original" if revert else "patched")
+        return True
 
     def _clear_bypass_selections(self) -> None:
         """Clear all bypass checkbox selections."""

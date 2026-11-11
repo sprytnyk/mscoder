@@ -66,6 +66,7 @@ ISN_COPIER = {
     "success": "Success: ISN value {0} copied to target file. Saved to: {1}",
     "immobiliser_bypass": "Immobiliser bypass",
     "immobiliser_revert": "Revert immobiliser bypass",
+    "error_bypass_unsupported": "Error: This target file doesn't fit the immobiliser change. Its size, software version or patch state is wrong. MSCoder saved nothing. Choose the file again to check it.",
 }
 
 # About tab
