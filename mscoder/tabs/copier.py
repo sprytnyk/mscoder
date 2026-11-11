@@ -182,6 +182,16 @@ class IsnCopierTab(QWidget):
         self.layout.addWidget(self.status)
 
         self.setLayout(self.layout)
+        self.dme_selector.currentIndexChanged.connect(self._dme_type_changed)
+
+    def _dme_type_changed(self) -> None:
+        """Read both files again, since the ISN address and the bypass differ per DME type."""
+        source = self.source_file_input.text().strip()
+        target = self.target_file_input.text().strip()
+        if source:
+            self._read_isn_value(source)
+        if target:
+            self._update_bypass_options(target)
 
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""

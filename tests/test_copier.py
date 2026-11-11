@@ -239,3 +239,28 @@ def test_a_hidden_bypass_box_is_not_applied(tab, choose_file, tmp_path, dme):
 
     [out] = copy(tab, tmp_path)
     assert sorted(changed_offsets(with_isn(dme, other, ISN), out.read_bytes())) == []
+
+
+def test_switching_the_dme_type_checks_the_files_again(tab, choose_file, tmp_path):
+    # MS43 files with the bypass ticked, then the type is switched to MS42
+    tab.dme_selector.setCurrentText("MS43")
+    source_data = firmware("MS43", isn=ISN)
+    target_data = firmware("MS43")
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", source_data),
+        target=save(tmp_path, "target.bin", target_data),
+    )
+    tab.immobiliser_bypass_checkbox.setChecked(True)
+    tab.dme_selector.setCurrentText("MS42")
+
+    # an MS43 file doesn't have the MS42 version, so there is no MS42 bypass for it
+    assert not tab.immobiliser_bypass_checkbox.isVisible()
+    assert not tab.immobiliser_bypass_checkbox.isChecked()
+    # the ISN shown is the one the copy will use, read at the MS42 address
+    ms42_isn = source_data[0x3EDE : 0x3EDE + 6]
+    assert tab.isn_value_display.text() == ms42_isn.hex().upper()
+
+    [out] = copy(tab, tmp_path)
+    assert sorted(changed_offsets(with_isn("MS42", target_data, ms42_isn), out.read_bytes())) == []
