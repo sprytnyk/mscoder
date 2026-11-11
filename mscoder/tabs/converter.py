@@ -5,21 +5,16 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QVBoxLayout,
     QWidget,
 )
 
 from ..translations import get_translations
 from ..utils import vin_to_bytes, vin_to_str
+from ..widgets import StatusLabel, tab_layout
 
 # Constants
 VIN_LENGTH = 17
 HEX_LENGTH = 26  # 13 bytes * 2
-INPUT_HEIGHT = 30
-
-# Styling constants
-STYLE_TITLE = "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
-STYLE_INFO = "color: #666; margin-bottom: 15px;"
 
 
 class VinConverterTab(QWidget):
@@ -36,12 +31,9 @@ class VinConverterTab(QWidget):
         # Input fields
         self.vin_input = QLineEdit()
         self.hex_input = QLineEdit()
-        self.status = QLabel()
-        self.status.setWordWrap(True)
-        self.status.setMaximumWidth(600)
-
-        self.vin_input.setFixedHeight(INPUT_HEIGHT)
-        self.hex_input.setFixedHeight(INPUT_HEIGHT)
+        self.status = StatusLabel()
+        self.vin_input.setObjectName("mono")
+        self.hex_input.setObjectName("mono")
         self.vin_input.setPlaceholderText("WBADT43452G112233")
         self.hex_input.setPlaceholderText("202CA35D1031050900410820C3")
 
@@ -50,23 +42,25 @@ class VinConverterTab(QWidget):
         self.btn_to_str = QPushButton()
         self.btn_to_hex.clicked.connect(self._to_hex)
         self.btn_to_str.clicked.connect(self._to_str)
+        self.btn_to_hex.setObjectName("primary")
+        self.btn_to_str.setObjectName("primary")
 
         # Labels
         self.description = QLabel()
-        self.description.setStyleSheet(STYLE_TITLE)
+        self.description.setObjectName("title")
 
         self.info = QLabel()
         self.info.setWordWrap(True)
-        self.info.setStyleSheet(STYLE_INFO)
+        self.info.setObjectName("info")
 
         self.supported_label = QLabel()
-        self.supported_label.setStyleSheet("margin-bottom: 10px; color: #0066cc;")
+        self.supported_label.setObjectName("supported")
 
-        self.vin_label = QLabel()
-        self.hex_label = QLabel()
+        self.vin_label = QLabel(objectName="fieldLabel")
+        self.hex_label = QLabel(objectName="fieldLabel")
 
         # Layout
-        self.layout = QVBoxLayout()
+        self.layout = tab_layout()
         self.layout.addWidget(self.description)
         self.layout.addWidget(self.info)
         self.layout.addWidget(self.supported_label)
@@ -80,6 +74,7 @@ class VinConverterTab(QWidget):
         btns.addWidget(self.btn_to_str)
         self.layout.addLayout(btns)
         self.layout.addWidget(self.status)
+        self.layout.addStretch()
 
         self.setLayout(self.layout)
 

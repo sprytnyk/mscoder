@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
 
 # Handle both direct execution and module execution
 try:
+    from . import theme
+    from .paths import ASSETS
     from .tabs import AboutTab, IsnCopierTab, VinConverterTab, VinReplacerTab
     from .translations import get_translations
 except ImportError:
@@ -25,25 +27,12 @@ except ImportError:
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from mscoder import theme
+    from mscoder.paths import ASSETS
     from mscoder.tabs import AboutTab, IsnCopierTab, VinConverterTab, VinReplacerTab
     from mscoder.translations import get_translations
 
-
-def get_assets_dir():
-    """Get assets directory, handling both dev and PyInstaller environments."""
-    if getattr(sys, "frozen", False):
-        # Running as compiled executable
-        base = Path(sys._MEIPASS)
-    else:
-        # Running in development
-        base = Path(__file__).resolve().parent.parent
-
-    return base
-
-
-# Constants
-ASSETS_DIR = get_assets_dir()
-APP_ICON = str(ASSETS_DIR / "assets" / "icon.ico")
+APP_ICON = str(ASSETS / "icon.ico")
 
 
 class MSCoder(QMainWindow):
@@ -58,18 +47,21 @@ class MSCoder(QMainWindow):
     def _init_ui(self) -> None:
         """Initialize UI components."""
         self.setWindowTitle(get_translations(self.current_lang).COMMON["window_title"])
-        self.resize(850, 650)  # Set default window size
+        self.resize(850, 740)  # tall enough for the ISN copier with a long message
 
         # Create central widget
         central_widget = QWidget()
+        central_widget.setObjectName("central")
         self.setCentralWidget(central_widget)
 
         # Main layout
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(14, 12, 14, 14)
+        main_layout.setSpacing(10)
 
         # Language selector at the top
         lang_layout = QHBoxLayout()
-        self.lang_label = QLabel()
+        self.lang_label = QLabel(objectName="languageLabel")
         self.lang_combo = QComboBox()
         self.lang_combo.addItem("🇬🇧", "en")
         self.lang_combo.addItem("🇺🇦", "uk")
@@ -133,12 +125,15 @@ class MSCoder(QMainWindow):
 def main() -> None:
     """Main entry point for the application."""
     app = QApplication(sys.argv)
+    app.setApplicationName("MSCoder")
+    theme.install(app)
     icon = QIcon(APP_ICON)
     app.setWindowIcon(icon)
 
     window = MSCoder()
     window.setWindowIcon(icon)
     window.show()
+    window.replacer_tab.original_vin_input.setFocus()
 
     sys.exit(app.exec())
 

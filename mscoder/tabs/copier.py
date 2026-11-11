@@ -11,14 +11,13 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QVBoxLayout,
     QWidget,
 )
 
 from ..translations import get_translations
+from ..widgets import StatusLabel, tab_layout
 
 # UI Constants
-INPUT_HEIGHT = 30
 
 # Binary data constants
 ISN_LENGTH = 6
@@ -86,10 +85,6 @@ DME_CONFIGS = {
     },
 }
 
-# Styling constants
-STYLE_TITLE = "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
-STYLE_INFO = "color: #666; margin-bottom: 15px;"
-
 
 class IsnCopierTab(QWidget):
     """Tab for copying ISN value between binary files."""
@@ -107,7 +102,6 @@ class IsnCopierTab(QWidget):
         self.dme_selector = QComboBox()
         self.dme_selector.addItems(["MS42", "MS43"])
         self.dme_selector.setCurrentText("MS43")
-        self.dme_selector.setFixedHeight(INPUT_HEIGHT)
 
         # Input fields
         self.source_file_input = QLineEdit()
@@ -116,12 +110,8 @@ class IsnCopierTab(QWidget):
         self.target_file_input.setReadOnly(True)
         self.isn_value_display = QLineEdit()
         self.isn_value_display.setReadOnly(True)
-        self.status = QLabel()
-        self.status.setWordWrap(True)
-
-        self.source_file_input.setFixedHeight(INPUT_HEIGHT)
-        self.target_file_input.setFixedHeight(INPUT_HEIGHT)
-        self.isn_value_display.setFixedHeight(INPUT_HEIGHT)
+        self.isn_value_display.setObjectName("mono")
+        self.status = StatusLabel()
 
         # Buttons
         self.btn_select_source = QPushButton()
@@ -130,6 +120,7 @@ class IsnCopierTab(QWidget):
         self.btn_select_source.clicked.connect(self._select_source_file)
         self.btn_select_target.clicked.connect(self._select_target_file)
         self.btn_process.clicked.connect(self._process_files)
+        self.btn_process.setObjectName("primary")
 
         # Checkboxes
         self.immobiliser_bypass_checkbox = QCheckBox()
@@ -141,19 +132,19 @@ class IsnCopierTab(QWidget):
 
         # Labels
         self.description = QLabel()
-        self.description.setStyleSheet(STYLE_TITLE)
+        self.description.setObjectName("title")
 
         self.info = QLabel()
         self.info.setWordWrap(True)
-        self.info.setStyleSheet(STYLE_INFO)
+        self.info.setObjectName("info")
 
-        self.dme_type_label = QLabel()
-        self.source_label = QLabel()
-        self.target_label = QLabel()
-        self.isn_label = QLabel()
+        self.dme_type_label = QLabel(objectName="fieldLabel")
+        self.source_label = QLabel(objectName="fieldLabel")
+        self.target_label = QLabel(objectName="fieldLabel")
+        self.isn_label = QLabel(objectName="fieldLabel")
 
         # Layout
-        self.layout = QVBoxLayout()
+        self.layout = tab_layout()
         self.layout.addWidget(self.description)
         self.layout.addWidget(self.info)
         self.layout.addWidget(self.dme_type_label)
@@ -179,6 +170,7 @@ class IsnCopierTab(QWidget):
         self.layout.addWidget(self.immobiliser_revert_checkbox)
         self.layout.addWidget(self.btn_process)
         self.layout.addWidget(self.status)
+        self.layout.addStretch()
 
         self.setLayout(self.layout)
         self.dme_selector.currentIndexChanged.connect(self._dme_type_changed)

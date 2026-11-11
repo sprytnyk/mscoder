@@ -83,6 +83,7 @@ jobs:
           test -f dist/MSCoder.app/Contents/Resources/icon.icns
           test -f dist/MSCoder.app/Contents/Resources/assets/icon.ico
           test -f dist/MSCoder.app/Contents/Resources/assets/ICON-LICENSE.txt
+          test -f dist/MSCoder.app/Contents/Resources/assets/icons/check.svg
           lipo -archs dist/MSCoder.app/Contents/MacOS/mscoder
       - name: Package
         run: |

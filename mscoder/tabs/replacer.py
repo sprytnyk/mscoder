@@ -9,20 +9,15 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QVBoxLayout,
     QWidget,
 )
 
 from ..translations import get_translations
 from ..utils import vin_to_bytes
+from ..widgets import StatusLabel, tab_layout
 
 # Constants
 VIN_LENGTH = 17
-INPUT_HEIGHT = 30
-
-# Styling constants
-STYLE_TITLE = "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
-STYLE_INFO = "color: #666; margin-bottom: 15px;"
 
 
 class VinReplacerTab(QWidget):
@@ -41,13 +36,9 @@ class VinReplacerTab(QWidget):
         self.replace_vin_input = QLineEdit()
         self.file_path_input = QLineEdit()
         self.file_path_input.setReadOnly(True)
-        self.status = QLabel()
-        self.status.setWordWrap(True)
-        self.status.setMaximumWidth(600)
-
-        self.original_vin_input.setFixedHeight(INPUT_HEIGHT)
-        self.replace_vin_input.setFixedHeight(INPUT_HEIGHT)
-        self.file_path_input.setFixedHeight(INPUT_HEIGHT)
+        self.status = StatusLabel()
+        self.original_vin_input.setObjectName("mono")
+        self.replace_vin_input.setObjectName("mono")
         self.original_vin_input.setPlaceholderText("WBADT43452G112233")
         self.replace_vin_input.setPlaceholderText("WBAGN63452D123456")
 
@@ -56,24 +47,25 @@ class VinReplacerTab(QWidget):
         self.btn_process = QPushButton()
         self.btn_select_file.clicked.connect(self._select_file)
         self.btn_process.clicked.connect(self._process_file)
+        self.btn_process.setObjectName("primary")
 
         # Labels
         self.description = QLabel()
-        self.description.setStyleSheet(STYLE_TITLE)
+        self.description.setObjectName("title")
 
         self.info = QLabel()
         self.info.setWordWrap(True)
-        self.info.setStyleSheet(STYLE_INFO)
+        self.info.setObjectName("info")
 
         self.supported_label = QLabel()
-        self.supported_label.setStyleSheet("margin-bottom: 10px; color: #0066cc;")
+        self.supported_label.setObjectName("supported")
 
-        self.original_label = QLabel()
-        self.replace_label = QLabel()
-        self.file_label = QLabel()
+        self.original_label = QLabel(objectName="fieldLabel")
+        self.replace_label = QLabel(objectName="fieldLabel")
+        self.file_label = QLabel(objectName="fieldLabel")
 
         # Layout
-        self.layout = QVBoxLayout()
+        self.layout = tab_layout()
         self.layout.addWidget(self.description)
         self.layout.addWidget(self.info)
         self.layout.addWidget(self.supported_label)
@@ -90,6 +82,7 @@ class VinReplacerTab(QWidget):
 
         self.layout.addWidget(self.btn_process)
         self.layout.addWidget(self.status)
+        self.layout.addStretch()
 
         self.setLayout(self.layout)
 

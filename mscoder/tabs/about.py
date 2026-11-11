@@ -1,14 +1,9 @@
 """About tab - application information and credits."""
 
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QWidget
 
 from ..translations import get_translations
-
-# Styling constants
-STYLE_SUBTITLE = "font-weight: bold; font-size: 18px; margin-bottom: 10px;"
-STYLE_META = "margin-bottom: 5px;"
-STYLE_INFO = "color: #666; margin-bottom: 15px;"
-STYLE_TITLE = "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
+from ..widgets import tab_layout
 
 
 class AboutTab(QWidget):
@@ -22,26 +17,25 @@ class AboutTab(QWidget):
 
     def _init_ui(self) -> None:
         """Initialize UI components."""
-        self.layout = QVBoxLayout()
+        self.layout = tab_layout()
 
         # Title
         self.title = QLabel()
-        self.title.setStyleSheet(STYLE_SUBTITLE)
+        self.title.setObjectName("title")
         self.layout.addWidget(self.title)
 
         # Version and author
         self.author = QLabel()
-        self.author.setStyleSheet(STYLE_META)
         self.author.setOpenExternalLinks(True)
         self.layout.addWidget(self.author)
 
         self.version = QLabel()
-        self.version.setStyleSheet(STYLE_INFO + " margin-bottom: 20px;")
+        self.version.setObjectName("version")
         self.layout.addWidget(self.version)
 
         # Description
         self.desc_title = QLabel()
-        self.desc_title.setStyleSheet(STYLE_TITLE + " margin-top: 10px;")
+        self.desc_title.setObjectName("fieldLabel")
         self.layout.addWidget(self.desc_title)
 
         # Add stretch to push content to top

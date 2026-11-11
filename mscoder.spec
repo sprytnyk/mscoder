@@ -15,6 +15,8 @@ datas = [
     ("assets/icon.ico", "assets"),
     # the icon's MIT License asks for its notice in every copy
     ("assets/ICON-LICENSE.txt", "assets"),
+    # the dropdown arrows and the check mark, with their MIT License
+    ("assets/icons", "assets/icons"),
 ]
 
 a = Analysis(
