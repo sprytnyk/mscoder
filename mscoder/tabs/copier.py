@@ -352,7 +352,7 @@ class IsnCopierTab(QWidget):
                 self.status.setText(self.t["source_selected"])
             else:
                 self.isn_value_display.setText("")
-                self.status.setText(self.t["error_file_too_small"])
+                self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
         except OSError as e:
             self.status.setText(f"Error reading file: {str(e)}")
             self.isn_value_display.setText("")
@@ -417,7 +417,7 @@ class IsnCopierTab(QWidget):
         """
         isn_bytes = self._read_isn_from_source(file_path)
         if isn_bytes is None:
-            self.status.setText(self.t["error_file_too_small"])
+            self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
         return isn_bytes
 
     def _fill_immo_area(self, data: bytearray, address: int, size: int) -> None:
@@ -450,7 +450,9 @@ class IsnCopierTab(QWidget):
         padding_size = config["immo_padding_size"]
 
         if not self._is_file_large_enough(target_data, isn_address + padding_size):
-            self.status.setText(self.t["error_target_too_small"])
+            # the area holds the ISN, then FF to its end
+            filler = padding_size - ISN_LENGTH
+            self.status.setText(self._too_small("error_target_too_small", filler))
             return None
 
         self._fill_immo_area(target_data, isn_address, padding_size)
@@ -529,6 +531,11 @@ class IsnCopierTab(QWidget):
         self.status.setText(self.t["success"].format(hex_value, filename))
 
         self._clear_bypass_selections()
+
+    def _too_small(self, key: str, length: int) -> str:
+        """Say which address and how many bytes after it this DME type needs."""
+        address = self._get_dme_config()["isn_address"]
+        return self.t[key].format(address=f"0x{address:04X}", length=length)
 
     def _get_dme_config(self) -> dict:
         """Get the configuration for the currently selected DME type."""

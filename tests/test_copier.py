@@ -155,10 +155,14 @@ def test_needs_both_files(tab, choose_file, tmp_path):
     assert tab.status.text() == T["error_required"]
 
 
-def test_refuses_a_source_too_small_for_the_isn(tab, choose_file, tmp_path):
-    pick(tab, choose_file, source=save(tmp_path, "source.bin", bytes(0x3ED4 + 5)))
+@pytest.mark.parametrize("dme", DMES)
+def test_refuses_a_source_too_small_for_the_isn(tab, choose_file, tmp_path, dme):
+    tab.dme_selector.setCurrentText(dme)
+    address = DME_CONFIGS[dme]["isn_address"]
+    pick(tab, choose_file, source=save(tmp_path, "source.bin", bytes(address + 5)))
     assert tab.isn_value_display.text() == ""
-    assert tab.status.text() == T["error_file_too_small"]
+    # the error names this DME's ISN address, not always the MS43 one
+    assert f"0x{address:04X} + 6 bytes" in tab.status.text()
 
 
 @pytest.mark.parametrize("dme", DMES)
@@ -175,7 +179,10 @@ def test_writes_nothing_to_a_target_too_small_for_the_isn(
         target=save(tmp_path, "target.bin", firmware(dme, size=size)),
     )
     assert copy(tab, tmp_path) == []
-    assert tab.status.text() == T["error_target_too_small"]
+    # the copier writes the 6 ISN bytes, then FF up to the end of the area
+    address, padding = config["isn_address"], config["immo_padding_size"]
+    assert f"ISN at 0x{address:04X} (6 bytes)" in tab.status.text()
+    assert f"{padding - 6} bytes of FF" in tab.status.text()
 
 
 # A typo here would write the wrong bytes into a DME, and the tests above build their
