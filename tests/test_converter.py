@@ -2,6 +2,7 @@ import pytest
 
 from mscoder.tabs.converter import VinConverterTab
 from mscoder.translations import en
+from mscoder.utils import vin_to_str
 
 VIN = "WBADT43452G112233"
 HEX = "202CA35D1031050900410820C3"
@@ -46,6 +47,11 @@ def test_refuses_bad_hex(tab, text: str, error: str):
     tab._to_str()
     assert tab.vin_input.text() == ""
     assert tab.status.text() == en.CONVERTER[error]
+
+
+def test_the_hex_placeholder_is_the_vin_placeholder_encoded(tab):
+    hex_hint = tab.hex_input.placeholderText()
+    assert vin_to_str(bytes.fromhex(hex_hint)) == tab.vin_input.placeholderText()
 
 
 def test_says_when_hex_is_not_an_encoded_vin(tab):

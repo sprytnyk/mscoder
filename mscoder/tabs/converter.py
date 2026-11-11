@@ -43,7 +43,7 @@ class VinConverterTab(QWidget):
         self.vin_input.setFixedHeight(INPUT_HEIGHT)
         self.hex_input.setFixedHeight(INPUT_HEIGHT)
         self.vin_input.setPlaceholderText("WBADT43452G112233")
-        self.hex_input.setPlaceholderText("B01144333452471122233300")
+        self.hex_input.setPlaceholderText("202CA35D1031050900410820C3")
 
         # Buttons
         self.btn_to_hex = QPushButton()
