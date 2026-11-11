@@ -2,7 +2,7 @@
 
 > **⚠️ DISCLAIMER:** Modifying firmware carries risks, including the potential to brick your DME. **Always create a backup of your original firmware before making any modifications.** Use this tool at your own risk. I am not responsible for any damage.
 
-Supported languages: 🇬🇧 English | 🇺🇦 Українська  
+Supported languages: 🇬🇧 English | 🇺🇦 Українська\
 Supported platforms: Linux | macOS | Windows
 
 This tool helps you work with VIN & ISN data for BMW MS4X engine control units. It can convert VIN strings to their hexadecimal representation, find/replace VINs in binary DME files, copy ISN between DME files, and apply IMMO bypass patches.
@@ -92,7 +92,8 @@ uv sync
 uv run python -m mscoder
 ```
 
-Run the tests with `make test`.
+Run the tests with `make test`. To run ruff and the tests before each commit, install the
+hooks once with `uvx pre-commit install`.
 
 ## References
 
