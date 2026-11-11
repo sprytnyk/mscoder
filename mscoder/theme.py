@@ -144,8 +144,12 @@ def stylesheet(t: Theme) -> str:
     QComboBox::down-arrow {{ image: url("{down}"); width: 12px; height: 12px; }}
     QComboBox::down-arrow:on {{ image: url("{up}"); }}
     QComboBox QAbstractItemView {{ background: {t.surface}; color: {t.text};
-        border: 1px solid {t.border}; padding: 4px; outline: 0;
-        selection-background-color: {t.selection}; selection-color: {t.text}; }}
+        border: 1px solid {t.border}; padding: 4px; outline: 0; }}
+    QComboBox QAbstractItemView::item {{ padding: 7px 10px; min-height: 22px;
+        border-radius: 6px; margin: 1px 0; }}
+    QComboBox QAbstractItemView::item:hover {{ background: {t.info_bg}; }}
+    QComboBox QAbstractItemView::item:selected {{ background: {t.selection};
+        color: {t.text}; }}
 
     QPushButton {{ background: {t.surface}; color: {t.text}; border: 1px solid {t.border};
         border-radius: 7px; padding: 7px 18px; min-height: 22px; }}

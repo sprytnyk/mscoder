@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QStyledItemDelegate
 
 from mscoder import theme
 from mscoder.__main__ import MSCoder
@@ -64,3 +65,24 @@ def test_the_stylesheet_points_at_icons_that_exist(app, t):
     for url in urls:
         assert Path(url).is_file()
         assert t.muted in Path(url).read_text() or t.on_focus in Path(url).read_text()
+
+
+def test_dropdown_rows_get_padding_and_rounded_corners(app):
+    # Qt's default dropdown rows ignore the stylesheet's ::item padding
+    theme.install(app)
+    window = MSCoder()
+    window.show()
+    for combo in (window.lang_combo, window.isn_copier_tab.dme_selector):
+        assert type(combo.itemDelegate()) is QStyledItemDelegate
+    window.close()
+    for t in (theme.DARK, theme.LIGHT):
+        assert "QComboBox QAbstractItemView::item {" in theme.stylesheet(t)
+
+
+def test_the_language_rows_name_each_language(app):
+    window = MSCoder()
+    rows = [window.lang_combo.itemText(i) for i in range(window.lang_combo.count())]
+    assert rows == ["🇬🇧  English", "🇺🇦  Українська"]
+    window.lang_combo.setCurrentIndex(1)
+    assert window.current_lang == "uk"
+    window.close()
