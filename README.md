@@ -114,3 +114,7 @@ And it was inspired by [E46 Temperature Gauge Hex Generator v1.0](https://www.e4
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+The app icon, `assets/icon.svg`, is the BMW logo from
+[SVG Repo](https://www.svgrepo.com/svg/452172/bmw), and the MIT License doesn't cover
+it. BMW and the BMW logo are trademarks of BMW AG. MSCoder isn't made or endorsed by BMW.
