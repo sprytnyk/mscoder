@@ -1,5 +1,5 @@
 import string
-from typing import Iterator
+from collections.abc import Iterator
 
 CHAR_MAP = string.digits + string.ascii_uppercase
 

@@ -1,8 +1,7 @@
 """ISN Copier tab - copies ISN values between binary firmware files."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -228,7 +227,7 @@ class IsnCopierTab(QWidget):
             self._update_bypass_options(file_path)
             self.status.setText(self.t["target_selected"])
 
-    def _read_file_data(self, file_path: str) -> Optional[bytes]:
+    def _read_file_data(self, file_path: str) -> bytes | None:
         """Read binary file data.
 
         Returns:
@@ -237,7 +236,7 @@ class IsnCopierTab(QWidget):
         try:
             with open(file_path, "rb") as f:
                 return f.read()
-        except (OSError, IOError):
+        except OSError:
             return None
 
     def _is_file_large_enough(self, data: bytes, required_size: int) -> bool:
@@ -354,14 +353,14 @@ class IsnCopierTab(QWidget):
             else:
                 self.isn_value_display.setText("")
                 self.status.setText(self.t["error_file_too_small"])
-        except (OSError, IOError) as e:
+        except OSError as e:
             self.status.setText(f"Error reading file: {str(e)}")
             self.isn_value_display.setText("")
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
             self.isn_value_display.setText("")
 
-    def _read_isn_from_source(self, file_path: str) -> Optional[bytes]:
+    def _read_isn_from_source(self, file_path: str) -> bytes | None:
         """Read ISN bytes from file at configured address.
 
         Returns:
@@ -405,12 +404,12 @@ class IsnCopierTab(QWidget):
                 return
             self._save_modified_file(target_path, target_data, isn_bytes)
 
-        except (OSError, IOError) as e:
+        except OSError as e:
             self.status.setText(f"File error: {str(e)}")
         except Exception as e:
             self.status.setText(f"Error: {str(e)}")
 
-    def _read_isn_from_file(self, file_path: str) -> Optional[bytes]:
+    def _read_isn_from_file(self, file_path: str) -> bytes | None:
         """Read ISN value from source file.
 
         Returns:
@@ -433,7 +432,7 @@ class IsnCopierTab(QWidget):
 
     def _load_and_prepare_target(
         self, file_path: str, isn_bytes: bytes
-    ) -> Optional[bytearray]:
+    ) -> bytearray | None:
         """Load target file and write ISN value.
 
         Returns:
@@ -540,7 +539,7 @@ class IsnCopierTab(QWidget):
     def _get_modified_filepath(original_path: str) -> str:
         """Generate modified file path with datetime suffix."""
         path = Path(original_path)
-        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
         new_filename = f"{path.stem}_{timestamp}{path.suffix}"
         new_path = path.parent / new_filename
         return str(new_path)

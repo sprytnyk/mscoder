@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..translations import get_translations
-from ..utils import vin_to_str, vin_to_bytes
+from ..utils import vin_to_bytes, vin_to_str
 
 # Constants
 VIN_LENGTH = 17

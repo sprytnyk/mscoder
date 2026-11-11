@@ -24,7 +24,13 @@ def save(folder: Path, name: str, data: bytes) -> Path:
     return path
 
 
-def pick(tab: IsnCopierTab, choose_file, *, source: Path | None = None, target: Path | None = None):
+def pick(
+    tab: IsnCopierTab,
+    choose_file,
+    *,
+    source: Path | None = None,
+    target: Path | None = None,
+):
     if source:
         choose_file(source)
         tab._select_source_file()
@@ -86,14 +92,20 @@ def test_offers_the_bypass_for_a_supported_file(tab, choose_file, tmp_path, dme)
 @pytest.mark.parametrize("dme", DMES)
 def test_offers_to_revert_a_patched_file(tab, choose_file, tmp_path, dme):
     tab.dme_selector.setCurrentText(dme)
-    pick(tab, choose_file, target=save(tmp_path, "target.bin", firmware(dme, patched=True)))
+    pick(
+        tab,
+        choose_file,
+        target=save(tmp_path, "target.bin", firmware(dme, patched=True)),
+    )
     assert not tab.immobiliser_bypass_checkbox.isVisible()
     assert tab.immobiliser_revert_checkbox.isVisible()
 
 
 @pytest.mark.parametrize("dme", DMES)
 @pytest.mark.parametrize("problem", ["wrong version", "too small"])
-def test_offers_no_bypass_for_an_unsupported_file(tab, choose_file, tmp_path, dme, problem):
+def test_offers_no_bypass_for_an_unsupported_file(
+    tab, choose_file, tmp_path, dme, problem
+):
     tab.dme_selector.setCurrentText(dme)
     if problem == "wrong version":
         data = firmware(dme, version="999999")
@@ -136,7 +148,9 @@ def test_revert_puts_back_the_original_bytes(tab, choose_file, tmp_path, dme):
 
 
 def test_needs_both_files(tab, choose_file, tmp_path):
-    pick(tab, choose_file, source=save(tmp_path, "source.bin", firmware("MS43", isn=ISN)))
+    pick(
+        tab, choose_file, source=save(tmp_path, "source.bin", firmware("MS43", isn=ISN))
+    )
     assert copy(tab, tmp_path) == []
     assert tab.status.text() == T["error_required"]
 
@@ -148,7 +162,9 @@ def test_refuses_a_source_too_small_for_the_isn(tab, choose_file, tmp_path):
 
 
 @pytest.mark.parametrize("dme", DMES)
-def test_writes_nothing_to_a_target_too_small_for_the_isn(tab, choose_file, tmp_path, dme):
+def test_writes_nothing_to_a_target_too_small_for_the_isn(
+    tab, choose_file, tmp_path, dme
+):
     tab.dme_selector.setCurrentText(dme)
     config = DME_CONFIGS[dme]
     size = config["isn_address"] + config["immo_padding_size"] - 1
@@ -263,7 +279,12 @@ def test_switching_the_dme_type_checks_the_files_again(tab, choose_file, tmp_pat
     assert tab.isn_value_display.text() == ms42_isn.hex().upper()
 
     [out] = copy(tab, tmp_path)
-    assert sorted(changed_offsets(with_isn("MS42", target_data, ms42_isn), out.read_bytes())) == []
+    assert (
+        sorted(
+            changed_offsets(with_isn("MS42", target_data, ms42_isn), out.read_bytes())
+        )
+        == []
+    )
 
 
 @pytest.mark.parametrize("dme", DMES)
@@ -272,10 +293,17 @@ def test_bypass_is_checked_again_when_copying(tab, choose_file, tmp_path, dme, p
     # the target changes on disk between choosing it and copying
     tab.dme_selector.setCurrentText(dme)
     target = save(tmp_path, "target.bin", firmware(dme))
-    pick(tab, choose_file, source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)), target=target)
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=target,
+    )
     tab.immobiliser_bypass_checkbox.setChecked(True)
     if problem == "too small":
-        target.write_bytes(firmware(dme, size=DME_CONFIGS[dme]["min_firmware_size"] - 1))
+        target.write_bytes(
+            firmware(dme, size=DME_CONFIGS[dme]["min_firmware_size"] - 1)
+        )
     else:
         target.write_bytes(firmware(dme, version="999999"))
 

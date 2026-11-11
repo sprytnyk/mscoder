@@ -1,6 +1,6 @@
 """VIN Replacer tab - finds and replaces VINs in binary files."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -178,5 +178,5 @@ class VinReplacerTab(QWidget):
     def _get_modified_filepath(original_path: str) -> str:
         """Generate modified file path with datetime suffix."""
         path = Path(original_path)
-        timestamp = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
         return str(path.parent / f"{path.stem}_{timestamp}{path.suffix}")

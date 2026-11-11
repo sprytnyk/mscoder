@@ -19,7 +19,10 @@ def test_vin_to_hex(tab):
     assert tab.status.text() == en.CONVERTER["ok"]
 
 
-@pytest.mark.parametrize("text", [HEX, HEX.lower(), "0x" + HEX, " ".join(HEX[i : i + 2] for i in range(0, 26, 2))])
+@pytest.mark.parametrize(
+    "text",
+    [HEX, HEX.lower(), "0x" + HEX, " ".join(HEX[i : i + 2] for i in range(0, 26, 2))],
+)
 def test_hex_to_vin(tab, text: str):
     tab.hex_input.setText(text)
     tab._to_str()
@@ -34,7 +37,10 @@ def test_refuses_a_short_vin(tab):
     assert tab.status.text() == en.CONVERTER["error_vin_length"]
 
 
-@pytest.mark.parametrize(("text", "error"), [(HEX[:-2], "error_hex_length"), ("ZZ" + HEX[2:], "error_hex_format")])
+@pytest.mark.parametrize(
+    ("text", "error"),
+    [(HEX[:-2], "error_hex_length"), ("ZZ" + HEX[2:], "error_hex_format")],
+)
 def test_refuses_bad_hex(tab, text: str, error: str):
     tab.hex_input.setText(text)
     tab._to_str()

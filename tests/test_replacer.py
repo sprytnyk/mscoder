@@ -66,7 +66,9 @@ def test_writes_nothing_when_the_vin_is_not_there(tab, choose_file, dump, tmp_pa
         ("", NEW_VIN, "error_required"),
     ],
 )
-def test_writes_nothing_for_a_bad_vin(tab, choose_file, dump, tmp_path, old, new, error):
+def test_writes_nothing_for_a_bad_vin(
+    tab, choose_file, dump, tmp_path, old, new, error
+):
     before = set(tmp_path.iterdir())
     run(tab, choose_file, dump, old, new)
     assert new_files(tmp_path, before) == []
