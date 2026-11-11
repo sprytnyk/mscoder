@@ -4,7 +4,7 @@ import pytest
 
 from mscoder.tabs.copier import DME_CONFIGS, IsnCopierTab
 from mscoder.translations import en
-from tests.helpers import ISN, firmware, new_files, with_isn
+from tests.helpers import ISN, changed_offsets, firmware, new_files, with_isn
 
 DMES = ["MS42", "MS43"]
 T = en.ISN_COPIER
@@ -220,3 +220,22 @@ def test_patches_fit_the_file_and_do_not_overlap(dme):
     areas.sort()
     for (start, size), (next_start, _) in zip(areas, areas[1:], strict=False):
         assert start + size <= next_start
+
+
+@pytest.mark.parametrize("dme", DMES)
+def test_a_hidden_bypass_box_is_not_applied(tab, choose_file, tmp_path, dme):
+    # tick the bypass for a supported file, then switch to one that isn't supported
+    tab.dme_selector.setCurrentText(dme)
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=save(tmp_path, "supported.bin", firmware(dme)),
+    )
+    tab.immobiliser_bypass_checkbox.setChecked(True)
+    other = firmware(dme, version="999999")
+    pick(tab, choose_file, target=save(tmp_path, "other.bin", other))
+    assert not tab.immobiliser_bypass_checkbox.isVisible()
+
+    [out] = copy(tab, tmp_path)
+    assert sorted(changed_offsets(with_isn(dme, other, ISN), out.read_bytes())) == []

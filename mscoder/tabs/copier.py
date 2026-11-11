@@ -279,19 +279,25 @@ class IsnCopierTab(QWidget):
             for patch in patches
         )
 
+    @staticmethod
+    def _hide(checkbox: QCheckBox) -> None:
+        """Hide a checkbox and untick it, so a tick for one file can't apply to another."""
+        checkbox.setChecked(False)
+        checkbox.hide()
+
     def _hide_all_bypass_options(self) -> None:
         """Hide both bypass checkboxes."""
-        self.immobiliser_bypass_checkbox.hide()
-        self.immobiliser_revert_checkbox.hide()
+        self._hide(self.immobiliser_bypass_checkbox)
+        self._hide(self.immobiliser_revert_checkbox)
 
     def _show_bypass_option(self) -> None:
         """Show bypass checkbox, hide revert."""
         self.immobiliser_bypass_checkbox.show()
-        self.immobiliser_revert_checkbox.hide()
+        self._hide(self.immobiliser_revert_checkbox)
 
     def _show_revert_option(self) -> None:
         """Show revert checkbox, hide bypass."""
-        self.immobiliser_bypass_checkbox.hide()
+        self._hide(self.immobiliser_bypass_checkbox)
         self.immobiliser_revert_checkbox.show()
 
     def _update_bypass_options(self, file_path: str) -> None:
