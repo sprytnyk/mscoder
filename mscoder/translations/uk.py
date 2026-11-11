@@ -21,6 +21,7 @@ CONVERTER = {
     "error_vin_length": "Помилка: VIN повинен бути довжиною 17 символів",
     "error_hex_length": "Помилка: Hex повинен бути 26 hex цифр (13 байтів)",
     "error_hex_format": "Помилка: Невірний hex формат",
+    "error_hex_not_vin": "Помилка: Ці байти не є закодованим VIN",
     "warning_decoded": "Попередження: Декодований VIN має {0} символів (очікується 17)",
     "ok": "OK",
     "supported": "Підтримується: MS41, MS42, MS43",

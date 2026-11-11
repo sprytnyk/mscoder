@@ -46,3 +46,10 @@ def test_refuses_bad_hex(tab, text: str, error: str):
     tab._to_str()
     assert tab.vin_input.text() == ""
     assert tab.status.text() == en.CONVERTER[error]
+
+
+def test_says_when_hex_is_not_an_encoded_vin(tab):
+    tab.hex_input.setText("FF" * 13)
+    tab._to_str()
+    assert tab.vin_input.text() == ""
+    assert tab.status.text() == en.CONVERTER["error_hex_not_vin"]

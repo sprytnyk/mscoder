@@ -127,15 +127,19 @@ class VinConverterTab(QWidget):
             raw = bytes(
                 int(hex_text[i : i + 2], 16) for i in range(0, len(hex_text), 2)
             )
-            vin = vin_to_str(raw)
-
-            if len(vin) != VIN_LENGTH:
-                self.status.setText(self.t["warning_decoded"].format(len(vin)))
-            else:
-                self.status.setText(self.t["ok"])
-
-            self.vin_input.setText(vin)
         except ValueError:
             self.status.setText(self.t["error_hex_format"])
-        except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
+            return
+
+        try:
+            vin = vin_to_str(raw)
+        except ValueError:
+            self.status.setText(self.t["error_hex_not_vin"])
+            return
+
+        if len(vin) != VIN_LENGTH:
+            self.status.setText(self.t["warning_decoded"].format(len(vin)))
+        else:
+            self.status.setText(self.t["ok"])
+
+        self.vin_input.setText(vin)

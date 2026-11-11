@@ -21,6 +21,7 @@ CONVERTER = {
     "error_vin_length": "Error: VIN must be 17 characters long",
     "error_hex_length": "Error: Hex must be 26 hex digits (13 bytes)",
     "error_hex_format": "Error: Invalid hex format",
+    "error_hex_not_vin": "Error: These bytes aren't an encoded VIN",
     "warning_decoded": "Warning: Decoded VIN is {0} chars (expected 17)",
     "ok": "OK",
     "supported": "Supported: MS41, MS42, MS43",

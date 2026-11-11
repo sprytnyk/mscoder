@@ -40,3 +40,9 @@ def test_lowercase_vin_is_read_as_uppercase():
 def test_characters_outside_digits_and_letters_are_refused(vin: str):
     with pytest.raises(ValueError):
         vin_to_bytes(vin)
+
+
+def test_bytes_that_are_not_an_encoded_vin_are_refused():
+    # each 6 bits pick one of 36 characters, so 0b111111 (63) has no character
+    with pytest.raises(ValueError):
+        vin_to_str(bytes.fromhex("FF" * 13))

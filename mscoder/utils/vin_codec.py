@@ -30,13 +30,21 @@ def vin_to_str(vin: bytes) -> str:
 
     Returns:
         17-character VIN string
+
+    Raises:
+        ValueError: If the bytes aren't an encoded VIN
     """
     vin = vin.rjust(15, b"\x00")
     chars = []
 
     for a, b, c in _chunk(vin, 3):
         x = (a << 16) | (b << 8) | c
-        chars.extend(CHAR_MAP[(x >> s) & 0x3F] for s in (18, 12, 6, 0))
+        for s in (18, 12, 6, 0):
+            code = (x >> s) & 0x3F
+            # 6 bits go up to 63, but there are only 36 characters
+            if code >= len(CHAR_MAP):
+                raise ValueError(f"{code} has no VIN character")
+            chars.append(CHAR_MAP[code])
 
     return "".join(chars)[3:]
 
