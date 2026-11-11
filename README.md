@@ -119,3 +119,7 @@ The app icon, `assets/icon.svg`, is "Bmw" by Garuda Technology from
 [SVG Repo](https://www.svgrepo.com/svg/452172/bmw), under its own MIT License; see
 [assets/ICON-LICENSE.txt](assets/ICON-LICENSE.txt). BMW and the BMW logo are trademarks of
 BMW AG. MSCoder isn't made or endorsed by BMW.
+
+The dropdown arrows and the check mark in `assets/icons` are from
+[Phosphor Icons](https://github.com/phosphor-icons/core), under the MIT License; see
+[assets/icons/LICENSE.txt](assets/icons/LICENSE.txt).
