@@ -1,13 +1,13 @@
-.PHONY: clean build test icns all
+.PHONY: clean build test icons all
 
 all: build
 
 test:
 	uv run pytest
 
-# remake assets/icon.icns, the macOS icon, from assets/icon.ico
-icns:
-	QT_QPA_PLATFORM=offscreen uv run python scripts/make_icns.py
+# remake assets/icon.ico and assets/icon.icns from assets/icon.svg
+icons:
+	QT_QPA_PLATFORM=offscreen uv run python scripts/make_icons.py
 
 clean:
 	rm -rf build dist __pycache__ icon.iconset
