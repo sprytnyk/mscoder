@@ -1,6 +1,9 @@
-.PHONY: clean build all
+.PHONY: clean build test all
 
 all: build
+
+test:
+	uv run pytest
 
 clean:
 	rm -rf build dist __pycache__ icon.iconset
@@ -10,4 +13,4 @@ clean:
 	find . -type f -name "*.spec~" -delete
 
 build:
-	pyinstaller mscoder.spec --clean
+	uv run pyinstaller mscoder.spec --clean

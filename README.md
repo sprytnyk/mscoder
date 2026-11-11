@@ -84,12 +84,15 @@ This tool has been tested and proven to work on real hardware:
 
 Download pre-built binaries for different distributions from the [Releases](https://github.com/sprytnyk/mscoder/releases) page.
 
-Or run from source:
+Or run from source with [uv](https://docs.astral.sh/uv/). It picks Python 3.14 from
+`.python-version`:
 
 ```bash
-python3.11 -m pip install -r requirements.txt
-python -m mscoder
+uv sync
+uv run python -m mscoder
 ```
+
+Run the tests with `make test`.
 
 ## References
 

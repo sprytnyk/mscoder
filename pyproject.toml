@@ -1,0 +1,28 @@
+[project]
+name = "mscoder"
+description = "VIN and ISN tool for BMW MS4x DME firmware files"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "sprytnyk.dev" }]
+requires-python = ">=3.14,<3.16"
+version = "0"  # the app's version is in mscoder/__init__.py
+dependencies = [
+    "PySide6-Essentials>=6.12",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.22",
+    "pytest>=8",
+    "ruff>=0.17",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
