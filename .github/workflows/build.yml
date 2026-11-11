@@ -36,43 +36,68 @@ jobs:
 
   build:
     needs: checks
-    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-14, windows-2022]
         include:
           - os: ubuntu-22.04
             artifact_name: mscoder-linux-x64
-            output_path: dist/mscoder
-          - os: macos-14
-            artifact_name: mscoder-macos-x64
-            output_path: dist/mscoder
+            arch: x64
           - os: windows-2022
             artifact_name: mscoder-windows-x64.exe
-            output_path: dist/mscoder.exe
-
+            arch: x64
+          - os: macos-15-intel
+            artifact_name: mscoder-macos-x64
+            arch: x64
+            mac_arch: x86_64
+          - os: macos-15
+            artifact_name: mscoder-macos-arm64
+            arch: arm64
+            mac_arch: arm64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-      id: python
-      with:
-        python-version-file: .python-version
-        architecture: 'x64'
-
-    - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-
-    - name: Install dependencies
-      run: uv sync --locked --python "${{ steps.python.outputs.python-path }}"
-
-    - name: Build with PyInstaller
-      run: uv run --no-sync pyinstaller mscoder.spec
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.artifact_name }}
-        path: ${{ matrix.output_path }}
-        if-no-files-found: error
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        id: python
+        with:
+          python-version-file: .python-version
+          architecture: ${{ matrix.arch }}
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Install dependencies
+        run: uv sync --locked --python "${{ steps.python.outputs.python-path }}"
+      - name: Build with PyInstaller
+        env:
+          MSCODER_TARGET_ARCH: ${{ matrix.mac_arch }}
+        run: uv run --no-sync pyinstaller mscoder.spec --clean --noconfirm
+      - name: Check the app (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          # PyInstaller signs the app ad hoc. Apple Silicon Macs refuse to start an unsigned app.
+          codesign --verify --deep --strict --verbose=2 dist/MSCoder.app
+          plutil -p dist/MSCoder.app/Contents/Info.plist
+          test -f dist/MSCoder.app/Contents/Resources/icon.icns
+          test -f dist/MSCoder.app/Contents/Resources/assets/icon.ico
+          lipo -archs dist/MSCoder.app/Contents/MacOS/mscoder
+      - name: Package
+        run: |
+          mkdir -p out
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cp dist/mscoder.exe out/
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            # ditto zips the app like Finder does and keeps its symlinks and signature,
+            # which the artifact upload would lose
+            ditto -c -k --keepParent dist/MSCoder.app "out/${{ matrix.artifact_name }}.zip"
+          else
+            cp dist/mscoder out/
+          fi
+          ls -l out
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: out/*
+          if-no-files-found: error
