@@ -12,12 +12,11 @@ It can convert a VIN to hex bytes and back, replace the VIN in a DME file, copy 
 ## Features
 
 - **VIN Replacer** (`Alt+1`): Replace VIN in MS41, MS42, and MS43 binary DME files
-![Replacer](assets/mscoder/replacer.png)
 - **VIN Converter** (`Alt+2`): Convert between VIN string and hex bytes
-![Converter](assets/mscoder/converter.png)
 - **ISN Copier** (`Alt+3`): Copy ISN (Immobilizer Sequence Number) between MS42 and MS43 firmware files, with optional IMMO bypass functionality
-![Copier](assets/mscoder/copier.png)
 - **About** (`Alt+4`): Application information and credits
+
+![MSCoder replacing a VIN, converting a VIN to hex, and copying an ISN with the IMMO bypass](assets/mscoder/tabs.gif)
 
 ## Compatibility
 
