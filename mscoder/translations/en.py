@@ -67,6 +67,8 @@ ISN_COPIER = {
     "success": "Success: ISN value {0} copied to target file. Saved to: {1}",
     "immobiliser_bypass": "Immobiliser bypass",
     "immobiliser_revert": "Revert immobiliser bypass",
+    "immobiliser_finish": "Finish the half-done immobiliser bypass",
+    "warning_unknown_patch_bytes": "Warning: This file has unexpected bytes at {addresses}, where the immobiliser bypass goes. Another patch may use that space, so MSCoder won't offer the bypass for this file. You can still copy the ISN.",
     "error_bypass_unsupported": "Error: This target file doesn't fit the immobiliser change. Its size, software version or patch state is wrong. MSCoder saved nothing. Choose the file again to check it.",
 }
 

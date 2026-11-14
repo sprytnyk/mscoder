@@ -31,7 +31,7 @@ DME_CONFIGS = {
         "immo_padding_size": 66,
         "min_firmware_size": 0x481A5,
         "version_check_offset": 0x48042,
-        "version_check_value": "0110C6",
+        "version_check_values": ("0110C6",),
         "immobiliser_patches": [
             {
                 "address": 0x283BA,
@@ -59,7 +59,7 @@ DME_CONFIGS = {
         "immo_padding_size": 76,
         "min_firmware_size": 0x70A6F,
         "version_check_offset": 0x70042,
-        "version_check_value": "430069",
+        "version_check_values": ("430069",),
         "immobiliser_patches": [
             {
                 "address": 0x2E2F0,
@@ -93,6 +93,7 @@ class IsnCopierTab(QWidget):
         super().__init__(parent)
         self.lang = "en"
         self.t = None
+        self._finishes_bypass = False  # the file holds part of the bypass already
         self._init_ui()
         self.update_language("en")
 
@@ -182,7 +183,9 @@ class IsnCopierTab(QWidget):
         if source:
             self._read_isn_value(source)
         if target:
-            self._update_bypass_options(target)
+            warning = self._update_bypass_options(target)
+            if warning:
+                self.status.setText(warning)
 
     def update_language(self, lang: str) -> None:
         """Update UI text for the specified language."""
@@ -197,7 +200,7 @@ class IsnCopierTab(QWidget):
         self.btn_select_source.setText(self.t["btn_select"])
         self.btn_select_target.setText(self.t["btn_select"])
         self.btn_process.setText(self.t["btn_process"])
-        self.immobiliser_bypass_checkbox.setText(self.t["immobiliser_bypass"])
+        self._set_bypass_label()
         self.immobiliser_revert_checkbox.setText(self.t["immobiliser_revert"])
 
     def _select_source_file(self) -> None:
@@ -216,8 +219,8 @@ class IsnCopierTab(QWidget):
         )
         if file_path:
             self.target_file_input.setText(file_path)
-            self._update_bypass_options(file_path)
-            self.status.setText(self.t["target_selected"])
+            warning = self._update_bypass_options(file_path)
+            self.status.setText(warning or self.t["target_selected"])
 
     def _read_file_data(self, file_path: str) -> bytes | None:
         """Read binary file data.
@@ -240,45 +243,35 @@ class IsnCopierTab(QWidget):
         version_bytes = data[offset : offset + VERSION_LENGTH]
         return version_bytes.decode("ascii", errors="ignore")
 
-    def _check_version_compatibility(self, file_path: str) -> bool:
-        """Check if the target file has compatible software version for bypass.
-
-        Returns:
-            True if version is compatible, False otherwise
-        """
-        try:
-            config = self._get_dme_config()
-            version_offset = config.get("version_check_offset")
-            expected_version = config.get("version_check_value")
-
-            if not version_offset or not expected_version:
-                return False
-
-            data = self._read_file_data(file_path)
-            if data is None:
-                return False
-
-            min_size = version_offset + VERSION_LENGTH
-            if not self._is_file_large_enough(data, min_size):
-                return False
-
-            version_string = self._extract_version_string(data, version_offset)
-            return version_string == expected_version
-
-        except Exception:
-            return False
-
-    def _is_bypass_applied(self, data: bytes, patches: list) -> bool:
-        """Check if immobiliser bypass patches are already applied.
-
-        Returns:
-            True if any patch is applied, False otherwise
-        """
-        return any(
-            data[patch["address"] : patch["address"] + len(patch["patched"])]
-            == patch["patched"]
-            for patch in patches
+    def _bypass_is_made_for(self, data: bytes) -> bool:
+        """Whether the file is big enough and has a software version the bypass is made for."""
+        config = self._get_dme_config()
+        offset = config["version_check_offset"]
+        return (
+            self._is_file_large_enough(data, config["min_firmware_size"])
+            and self._extract_version_string(data, offset)
+            in config["version_check_values"]
         )
+
+    def _patch_state(self, data: bytes) -> tuple[str, list[int]]:
+        """How much of the bypass the file holds.
+
+        Returns "original" or "patched" when every patch area agrees, "partial" when
+        some hold the patch and the rest the original bytes, and "unknown" when an
+        area holds neither, with the addresses of those areas.
+        """
+        found, unknown = set(), []
+        for patch in self._get_dme_config()["immobiliser_patches"]:
+            area = data[patch["address"] : patch["address"] + len(patch["patched"])]
+            if area == patch["original"]:
+                found.add("original")
+            elif area == patch["patched"]:
+                found.add("patched")
+            else:
+                unknown.append(patch["address"])
+        if unknown:
+            return "unknown", unknown
+        return (found.pop() if len(found) == 1 else "partial"), []
 
     @staticmethod
     def _hide(checkbox: QCheckBox) -> None:
@@ -291,44 +284,33 @@ class IsnCopierTab(QWidget):
         self._hide(self.immobiliser_bypass_checkbox)
         self._hide(self.immobiliser_revert_checkbox)
 
-    def _show_bypass_option(self) -> None:
-        """Show bypass checkbox, hide revert."""
-        self.immobiliser_bypass_checkbox.show()
-        self._hide(self.immobiliser_revert_checkbox)
+    def _set_bypass_label(self) -> None:
+        """Name the bypass box after what it will do to the file."""
+        key = "immobiliser_finish" if self._finishes_bypass else "immobiliser_bypass"
+        self.immobiliser_bypass_checkbox.setText(self.t[key])
 
-    def _show_revert_option(self) -> None:
-        """Show revert checkbox, hide bypass."""
-        self._hide(self.immobiliser_bypass_checkbox)
-        self.immobiliser_revert_checkbox.show()
+    def _update_bypass_options(self, file_path: str) -> str | None:
+        """Offer the bypass, the rest of a half-done one, or its revert, whichever fits.
 
-    def _update_bypass_options(self, file_path: str) -> None:
-        """Update bypass/revert checkbox visibility based on file state."""
-        try:
-            config = self._get_dme_config()
-            data = self._read_file_data(file_path)
+        Returns:
+            A warning to show when a patch area holds bytes MSCoder doesn't expect
+        """
+        self._hide_all_bypass_options()
+        data = self._read_file_data(file_path)
+        if data is None or not self._bypass_is_made_for(data):
+            return None
 
-            if data is None:
-                self._hide_all_bypass_options()
-                return
-
-            # Validate file size
-            if not self._is_file_large_enough(data, config["min_firmware_size"]):
-                self._hide_all_bypass_options()
-                return
-
-            # Validate software version
-            if not self._check_version_compatibility(file_path):
-                self._hide_all_bypass_options()
-                return
-
-            # Determine if bypass is already applied
-            if self._is_bypass_applied(data, config["immobiliser_patches"]):
-                self._show_revert_option()
-            else:
-                self._show_bypass_option()
-
-        except Exception:
-            self._hide_all_bypass_options()
+        state, unknown = self._patch_state(data)
+        if state == "unknown":
+            addresses = ", ".join(f"0x{address:05X}" for address in unknown)
+            return self.t["warning_unknown_patch_bytes"].format(addresses=addresses)
+        if state == "patched":
+            self.immobiliser_revert_checkbox.show()
+        else:
+            self._finishes_bypass = state == "partial"
+            self._set_bypass_label()
+            self.immobiliser_bypass_checkbox.show()
+        return None
 
     def _bytes_to_hex_string(self, data: bytes) -> str:
         """Convert bytes to uppercase hex string."""
@@ -474,16 +456,12 @@ class IsnCopierTab(QWidget):
             data = patch[patch_type]
             target_data[addr : addr + len(data)] = data
 
-    def _bypass_fits(self, data: bytes, applied: bool) -> bool:
-        """Whether the data can take the bypass, or its revert when applied is True."""
-        config = self._get_dme_config()
-        offset = config["version_check_offset"]
-        return (
-            self._is_file_large_enough(data, config["min_firmware_size"])
-            and self._extract_version_string(data, offset)
-            == config["version_check_value"]
-            and self._is_bypass_applied(data, config["immobiliser_patches"]) == applied
-        )
+    def _bypass_fits(self, data: bytes, revert: bool) -> bool:
+        """Whether the data can take the bypass, the rest of a half-done one, or its revert."""
+        if not self._bypass_is_made_for(data):
+            return False
+        state, _ = self._patch_state(data)
+        return state == "patched" if revert else state in ("original", "partial")
 
     def _apply_immobiliser_patches(self, target_data: bytearray) -> bool:
         """Apply or revert immobiliser bypass patches.
@@ -497,7 +475,7 @@ class IsnCopierTab(QWidget):
             return True
 
         revert = not self.immobiliser_bypass_checkbox.isChecked()
-        if not self._bypass_fits(target_data, applied=revert):
+        if not self._bypass_fits(target_data, revert=revert):
             self.status.setText(self.t["error_bypass_unsupported"])
             return False
 

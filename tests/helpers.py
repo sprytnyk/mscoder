@@ -20,7 +20,7 @@ def firmware(
     data = bytearray((i * 7 + 3) % 251 for i in range(FIRMWARE_SIZE))
     data[config["isn_address"] : config["isn_address"] + 6] = isn
     offset = config["version_check_offset"]
-    data[offset : offset + 6] = (version or config["version_check_value"]).encode()
+    data[offset : offset + 6] = (version or config["version_check_values"][0]).encode()
     for patch in config["immobiliser_patches"]:
         new = patch["patched" if patched else "original"]
         data[patch["address"] : patch["address"] + len(new)] = new

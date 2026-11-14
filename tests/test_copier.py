@@ -193,7 +193,7 @@ PINNED = {
         66,
         0x481A5,
         0x48042,
-        "0110C6",
+        ("0110C6",),
         [
             (0x283BA, "8890 8860 8A0E 02F0 EA00", "DA07 C859 FE0E 2E0F DB00"),
             (0x481A4, "02", "00"),
@@ -205,7 +205,7 @@ PINNED = {
         76,
         0x70A6F,
         0x70042,
-        "430069",
+        ("430069",),
         [
             (0x2E2F0, "C2FE B90A", "C2FE 6E0A"),
             (0x600D8, "DA0A 6CDD", "DA0D F83B"),
@@ -224,7 +224,7 @@ def test_dme_tables_are_unchanged(dme):
     assert config["immo_padding_size"] == padding
     assert config["min_firmware_size"] == min_size
     assert config["version_check_offset"] == offset
-    assert config["version_check_value"] == version
+    assert config["version_check_values"] == version
     assert [
         (p["address"], p["original"].hex().upper(), p["patched"].hex().upper())
         for p in config["immobiliser_patches"]
@@ -316,3 +316,140 @@ def test_bypass_is_checked_again_when_copying(tab, choose_file, tmp_path, dme, p
 
     assert copy(tab, tmp_path) == []
     assert tab.status.text() == T["error_bypass_unsupported"]
+
+
+def partly_patched(dme: str, done: set[int], **kwargs) -> bytes:
+    """A file with only the patches at these indexes applied."""
+    data = bytearray(firmware(dme, **kwargs))
+    for i, patch in enumerate(DME_CONFIGS[dme]["immobiliser_patches"]):
+        if i in done:
+            data[patch["address"] : patch["address"] + len(patch["patched"])] = patch[
+                "patched"
+            ]
+    return bytes(data)
+
+
+def with_foreign_bytes(dme: str, index: int, data: bytes) -> bytes:
+    """A file where something other than the bypass sits in one patch area."""
+    patch = DME_CONFIGS[dme]["immobiliser_patches"][index]
+    out = bytearray(data)
+    size = len(patch["patched"])
+    out[patch["address"] : patch["address"] + size] = bytes([0x5A] * size)
+    return bytes(out)
+
+
+def patch_indexes(dme: str) -> list[int]:
+    return list(range(len(DME_CONFIGS[dme]["immobiliser_patches"])))
+
+
+HALF_DONE = [
+    (dme, i)
+    for dme in DMES
+    for i in range(len(DME_CONFIGS[dme]["immobiliser_patches"]))
+]
+
+
+@pytest.mark.parametrize(("dme", "missing"), HALF_DONE)
+def test_finishes_a_half_done_bypass(tab, choose_file, tmp_path, dme, missing):
+    # for example, the MS43 bypass from TunerPro without its separate DTC fix
+    tab.dme_selector.setCurrentText(dme)
+    done = set(patch_indexes(dme)) - {missing}
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=save(tmp_path, "target.bin", partly_patched(dme, done)),
+    )
+    assert tab.immobiliser_bypass_checkbox.isVisible()
+    assert tab.immobiliser_bypass_checkbox.text() == T["immobiliser_finish"]
+    assert not tab.immobiliser_revert_checkbox.isVisible()
+
+    tab.immobiliser_bypass_checkbox.setChecked(True)
+    [out] = copy(tab, tmp_path)
+    assert out.read_bytes() == with_isn(dme, firmware(dme, patched=True), ISN)
+
+
+@pytest.mark.parametrize("dme", DMES)
+def test_a_clean_file_after_a_half_done_one_gets_the_plain_label(
+    tab, choose_file, tmp_path, dme
+):
+    tab.dme_selector.setCurrentText(dme)
+    pick(tab, choose_file, target=save(tmp_path, "half.bin", partly_patched(dme, {0})))
+    pick(tab, choose_file, target=save(tmp_path, "clean.bin", firmware(dme)))
+    assert tab.immobiliser_bypass_checkbox.text() == T["immobiliser_bypass"]
+
+
+@pytest.mark.parametrize(("dme", "index"), HALF_DONE)
+@pytest.mark.parametrize("patched", [False, True])
+def test_offers_nothing_over_unexpected_bytes(
+    tab, choose_file, tmp_path, dme, index, patched
+):
+    # another patch may already use the space where the bypass goes, so leave it alone
+    tab.dme_selector.setCurrentText(dme)
+    target_data = with_foreign_bytes(dme, index, firmware(dme, patched=patched))
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=save(tmp_path, "target.bin", target_data),
+    )
+    assert not tab.immobiliser_bypass_checkbox.isVisible()
+    assert not tab.immobiliser_revert_checkbox.isVisible()
+    address = DME_CONFIGS[dme]["immobiliser_patches"][index]["address"]
+    assert tab.status.text().startswith("Warning:")
+    assert f"0x{address:05X}" in tab.status.text()
+
+    # the ISN still copies, and nothing else changes
+    [out] = copy(tab, tmp_path)
+    assert out.read_bytes() == with_isn(dme, target_data, ISN)
+
+
+@pytest.mark.parametrize("dme", DMES)
+@pytest.mark.parametrize("revert", [False, True])
+def test_bypass_refuses_unexpected_bytes_that_appear_before_copying(
+    tab, choose_file, tmp_path, dme, revert
+):
+    tab.dme_selector.setCurrentText(dme)
+    target = save(tmp_path, "target.bin", firmware(dme, patched=revert))
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=target,
+    )
+    box = tab.immobiliser_revert_checkbox if revert else tab.immobiliser_bypass_checkbox
+    box.setChecked(True)
+    target.write_bytes(with_foreign_bytes(dme, 0, firmware(dme, patched=revert)))
+
+    assert copy(tab, tmp_path) == []
+    assert tab.status.text() == T["error_bypass_unsupported"]
+
+
+@pytest.mark.parametrize("dme", DMES)
+def test_revert_refuses_a_file_that_became_half_done(tab, choose_file, tmp_path, dme):
+    tab.dme_selector.setCurrentText(dme)
+    target = save(tmp_path, "target.bin", firmware(dme, patched=True))
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware(dme, isn=ISN)),
+        target=target,
+    )
+    tab.immobiliser_revert_checkbox.setChecked(True)
+    target.write_bytes(partly_patched(dme, {0}))
+
+    assert copy(tab, tmp_path) == []
+    assert tab.status.text() == T["error_bypass_unsupported"]
+
+
+def test_switching_the_dme_type_shows_the_warning(tab, choose_file, tmp_path):
+    tab.dme_selector.setCurrentText("MS42")
+    pick(
+        tab,
+        choose_file,
+        target=save(
+            tmp_path, "target.bin", with_foreign_bytes("MS43", 1, firmware("MS43"))
+        ),
+    )
+    tab.dme_selector.setCurrentText("MS43")
+    assert "0x600D8" in tab.status.text()
