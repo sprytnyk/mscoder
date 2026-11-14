@@ -2,6 +2,8 @@
 
 Edit VIN and ISN in BMW MS41/MS42/MS43 DME files. Handy for swapping a used DME into your E46, E39 or E36.
 
+![MSCoder replacing a VIN, converting a VIN to hex, and copying an ISN with the IMMO bypass](assets/mscoder/tabs.gif)
+
 > **⚠️ DISCLAIMER:** Modifying firmware carries risks, including the potential to brick your DME. **Always create a backup of your original firmware before making any modifications.** Use this tool at your own risk. I am not responsible for any damage.
 
 Supported languages: 🇬🇧 English, 🇺🇦 Українська\
@@ -15,8 +17,6 @@ It can convert a VIN to hex bytes and back, replace the VIN in a DME file, copy 
 - **VIN Converter** (`Alt+2`): Convert between VIN string and hex bytes
 - **ISN Copier** (`Alt+3`): Copy ISN (Immobilizer Sequence Number) between MS42 and MS43 firmware files, with optional IMMO bypass functionality
 - **About** (`Alt+4`): Application information and credits
-
-![MSCoder replacing a VIN, converting a VIN to hex, and copying an ISN with the IMMO bypass](assets/mscoder/tabs.gif)
 
 ## Installation
 
