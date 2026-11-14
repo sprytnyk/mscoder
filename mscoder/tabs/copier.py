@@ -31,7 +31,8 @@ DME_CONFIGS = {
         "immo_padding_size": 66,
         "min_firmware_size": 0x481A5,
         "version_check_offset": 0x48042,
-        "version_check_values": ("0110C6",),
+        # the MS4x community patchlist makes the same bypass for both
+        "version_check_values": ("0110C6", "0110C7"),
         "immobiliser_patches": [
             {
                 "address": 0x283BA,

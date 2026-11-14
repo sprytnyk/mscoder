@@ -29,7 +29,7 @@ It can convert a VIN to hex bytes and back, replace the VIN in a DME file, copy 
 ### Supported ECU Versions
 
 IMMO bypass is supported for:
-- **MS42** version 0110C6
+- **MS42** versions 0110C6 and 0110C7
 - **MS43** version 430069
 
 The bypass writes the same bytes as the "Immobilizer Bypass" patches in the MS4x community patchlists, MS42 v1.7.1 and MS43 v2.9.2. For MS43 that includes the DTC fix. If a file has only part of the bypass, for example the MS43 bypass without the DTC fix, MSCoder offers to finish it. If a file has other bytes where the bypass goes, MSCoder won't offer the bypass, so it can't write over another patch.

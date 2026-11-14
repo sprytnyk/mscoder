@@ -193,7 +193,7 @@ PINNED = {
         66,
         0x481A5,
         0x48042,
-        ("0110C6",),
+        ("0110C6", "0110C7"),
         [
             (0x283BA, "8890 8860 8A0E 02F0 EA00", "DA07 C859 FE0E 2E0F DB00"),
             (0x481A4, "02", "00"),
@@ -440,6 +440,26 @@ def test_revert_refuses_a_file_that_became_half_done(tab, choose_file, tmp_path,
 
     assert copy(tab, tmp_path) == []
     assert tab.status.text() == T["error_bypass_unsupported"]
+
+
+@pytest.mark.parametrize("version", ["0110C6", "0110C7"])
+def test_ms42_bypass_takes_both_versions_from_the_patchlist(
+    tab, choose_file, tmp_path, version
+):
+    tab.dme_selector.setCurrentText("MS42")
+    target_data = firmware("MS42", version=version)
+    pick(
+        tab,
+        choose_file,
+        source=save(tmp_path, "source.bin", firmware("MS42", isn=ISN)),
+        target=save(tmp_path, "target.bin", target_data),
+    )
+    assert tab.immobiliser_bypass_checkbox.isVisible()
+    tab.immobiliser_bypass_checkbox.setChecked(True)
+
+    [out] = copy(tab, tmp_path)
+    patched = firmware("MS42", version=version, patched=True)
+    assert out.read_bytes() == with_isn("MS42", patched, ISN)
 
 
 def test_switching_the_dme_type_shows_the_warning(tab, choose_file, tmp_path):
