@@ -18,6 +18,28 @@ It can convert a VIN to hex bytes and back, replace the VIN in a DME file, copy 
 
 ![MSCoder replacing a VIN, converting a VIN to hex, and copying an ISN with the IMMO bypass](assets/mscoder/tabs.gif)
 
+## Installation
+
+Download pre-built binaries for different distributions from the [Releases](https://github.com/sprytnyk/mscoder/releases) page.
+
+On Linux, unpack `mscoder-linux-x64.tar.gz` and run `./mscoder`.
+
+On macOS, pick `macos-arm64` for Apple Silicon or `macos-x64` for Intel, and drag
+`MSCoder.app` into Applications. The app isn't notarized, so macOS blocks it the first
+time. Try to open it, then go to System Settings, open Privacy & Security and click Open
+Anyway. Or run `xattr -dr com.apple.quarantine /Applications/MSCoder.app`.
+
+Or run from source with [uv](https://docs.astral.sh/uv/). It picks Python 3.14 from
+`.python-version`:
+
+```bash
+uv sync
+uv run python -m mscoder
+```
+
+Run the tests with `make test`. To run ruff and the tests before each commit, install the
+hooks once with `uvx pre-commit install`.
+
 ## Compatibility
 
 ### Supported Operations
@@ -82,28 +104,6 @@ This tool has been tested and proven to work on real hardware:
   - VIN + ISN + bypass
   - ISN + bypass
 
-
-## Installation
-
-Download pre-built binaries for different distributions from the [Releases](https://github.com/sprytnyk/mscoder/releases) page.
-
-On Linux, unpack `mscoder-linux-x64.tar.gz` and run `./mscoder`.
-
-On macOS, pick `macos-arm64` for Apple Silicon or `macos-x64` for Intel, and drag
-`MSCoder.app` into Applications. The app isn't notarized, so macOS blocks it the first
-time. Try to open it, then go to System Settings, open Privacy & Security and click Open
-Anyway. Or run `xattr -dr com.apple.quarantine /Applications/MSCoder.app`.
-
-Or run from source with [uv](https://docs.astral.sh/uv/). It picks Python 3.14 from
-`.python-version`:
-
-```bash
-uv sync
-uv run python -m mscoder
-```
-
-Run the tests with `make test`. To run ruff and the tests before each commit, install the
-hooks once with `uvx pre-commit install`.
 
 ## References
 
