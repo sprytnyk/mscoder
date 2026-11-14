@@ -1,11 +1,13 @@
 # MSCoder
 
+Edit VIN and ISN in BMW MS41/MS42/MS43 DME files. Handy for swapping a used DME into your E46, E39 or E36.
+
 > **⚠️ DISCLAIMER:** Modifying firmware carries risks, including the potential to brick your DME. **Always create a backup of your original firmware before making any modifications.** Use this tool at your own risk. I am not responsible for any damage.
 
-Supported languages: 🇬🇧 English | 🇺🇦 Українська\
-Supported platforms: Linux | macOS | Windows
+Supported languages: 🇬🇧 English, 🇺🇦 Українська\
+Supported platforms: Linux, macOS, Windows
 
-This tool helps you work with VIN & ISN data for BMW MS4X engine control units. It can convert VIN strings to their hexadecimal representation, find/replace VINs in binary DME files, copy ISN between DME files, and apply IMMO bypass patches.
+It can convert a VIN to hex bytes and back, replace the VIN in a DME file, copy the ISN from one DME file to another, and apply an IMMO bypass patch.
 
 ## Features
 
