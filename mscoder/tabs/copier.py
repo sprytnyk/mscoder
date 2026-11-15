@@ -1,6 +1,5 @@
 """ISN Copier tab - copies ISN values between binary firmware files."""
 
-from datetime import UTC, datetime
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -14,17 +13,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..paths import modified_path
 from ..translations import get_translations
 from ..widgets import StatusLabel, tab_layout
 
-# UI Constants
-
-# Binary data constants
 ISN_LENGTH = 6
 VERSION_LENGTH = 6
 PADDING_BYTE = 0xFF
 
-# DME Configurations
 DME_CONFIGS = {
     "MS42": {
         "isn_address": 0x3EDE,
@@ -230,27 +226,17 @@ class IsnCopierTab(QWidget):
             File content as bytes, or None if reading fails
         """
         try:
-            with open(file_path, "rb") as f:
-                return f.read()
+            return Path(file_path).read_bytes()
         except OSError:
             return None
-
-    def _is_file_large_enough(self, data: bytes, required_size: int) -> bool:
-        """Check if file data meets minimum size requirement."""
-        return len(data) >= required_size
-
-    def _extract_version_string(self, data: bytes, offset: int) -> str:
-        """Extract version string from binary data at given offset."""
-        version_bytes = data[offset : offset + VERSION_LENGTH]
-        return version_bytes.decode("ascii", errors="ignore")
 
     def _bypass_is_made_for(self, data: bytes) -> bool:
         """Whether the file is big enough and has a software version the bypass is made for."""
         config = self._get_dme_config()
         offset = config["version_check_offset"]
         return (
-            self._is_file_large_enough(data, config["min_firmware_size"])
-            and self._extract_version_string(data, offset)
+            len(data) >= config["min_firmware_size"]
+            and data[offset : offset + VERSION_LENGTH].decode("ascii", errors="ignore")
             in config["version_check_values"]
         )
 
@@ -274,17 +260,6 @@ class IsnCopierTab(QWidget):
             return "unknown", unknown
         return (found.pop() if len(found) == 1 else "partial"), []
 
-    @staticmethod
-    def _hide(checkbox: QCheckBox) -> None:
-        """Hide a checkbox and untick it, so a tick for one file can't apply to another."""
-        checkbox.setChecked(False)
-        checkbox.hide()
-
-    def _hide_all_bypass_options(self) -> None:
-        """Hide both bypass checkboxes."""
-        self._hide(self.immobiliser_bypass_checkbox)
-        self._hide(self.immobiliser_revert_checkbox)
-
     def _set_bypass_label(self) -> None:
         """Name the bypass box after what it will do to the file."""
         key = "immobiliser_finish" if self._finishes_bypass else "immobiliser_bypass"
@@ -296,7 +271,13 @@ class IsnCopierTab(QWidget):
         Returns:
             A warning to show when a patch area holds bytes MSCoder doesn't expect
         """
-        self._hide_all_bypass_options()
+        # A tick for one file must not apply to another.
+        for checkbox in (
+            self.immobiliser_bypass_checkbox,
+            self.immobiliser_revert_checkbox,
+        ):
+            checkbox.setChecked(False)
+            checkbox.hide()
         data = self._read_file_data(file_path)
         if data is None or not self._bypass_is_made_for(data):
             return None
@@ -313,27 +294,21 @@ class IsnCopierTab(QWidget):
             self.immobiliser_bypass_checkbox.show()
         return None
 
-    def _bytes_to_hex_string(self, data: bytes) -> str:
-        """Convert bytes to uppercase hex string."""
-        return "".join(f"{b:02X}" for b in data)
-
     def _read_isn_value(self, file_path: str) -> None:
         """Read ISN value from source file and display it."""
         try:
             isn_bytes = self._read_isn_from_source(file_path)
-            if isn_bytes:
-                hex_value = self._bytes_to_hex_string(isn_bytes)
-                self.isn_value_display.setText(hex_value)
-                self.status.setText(self.t["source_selected"])
-            else:
-                self.isn_value_display.setText("")
-                self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
-        except OSError as e:
-            self.status.setText(f"Error reading file: {str(e)}")
+        except OSError as error:
+            self.status.setText(f"Error reading file: {error}")
             self.isn_value_display.setText("")
-        except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
+            return
+
+        if isn_bytes is None:
             self.isn_value_display.setText("")
+            self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
+        else:
+            self.isn_value_display.setText(isn_bytes.hex().upper())
+            self.status.setText(self.t["source_selected"])
 
     def _read_isn_from_source(self, file_path: str) -> bytes | None:
         """Read ISN bytes from file at configured address.
@@ -347,28 +322,18 @@ class IsnCopierTab(QWidget):
             isn_bytes = f.read(ISN_LENGTH)
             return isn_bytes if len(isn_bytes) == ISN_LENGTH else None
 
-    def _validate_file_paths(self, source_path: str, target_path: str) -> bool:
-        """Validate that both file paths are provided.
-
-        Returns:
-            True if both paths are valid, False otherwise
-        """
-        if not source_path or not target_path:
-            self.status.setText(self.t["error_required"])
-            return False
-        return True
-
     def _process_files(self) -> None:
         """Copy ISN value from source to target file."""
+        source_path = self.source_file_input.text().strip()
+        target_path = self.target_file_input.text().strip()
+        if not source_path or not target_path:
+            self.status.setText(self.t["error_required"])
+            return
+
         try:
-            source_path = self.source_file_input.text().strip()
-            target_path = self.target_file_input.text().strip()
-
-            if not self._validate_file_paths(source_path, target_path):
-                return
-
-            isn_bytes = self._read_isn_from_file(source_path)
+            isn_bytes = self._read_isn_from_source(source_path)
             if isn_bytes is None:
+                self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
                 return
 
             target_data = self._load_and_prepare_target(target_path, isn_bytes)
@@ -379,31 +344,8 @@ class IsnCopierTab(QWidget):
                 return
             self._save_modified_file(target_path, target_data, isn_bytes)
 
-        except OSError as e:
-            self.status.setText(f"File error: {str(e)}")
-        except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
-
-    def _read_isn_from_file(self, file_path: str) -> bytes | None:
-        """Read ISN value from source file.
-
-        Returns:
-            ISN bytes if successful, None on error
-        """
-        isn_bytes = self._read_isn_from_source(file_path)
-        if isn_bytes is None:
-            self.status.setText(self._too_small("error_file_too_small", ISN_LENGTH))
-        return isn_bytes
-
-    def _fill_immo_area(self, data: bytearray, address: int, size: int) -> None:
-        """Fill immobiliser area with padding bytes."""
-        data[address : address + size] = bytes([PADDING_BYTE] * size)
-
-    def _write_isn_to_data(
-        self, data: bytearray, address: int, isn_bytes: bytes
-    ) -> None:
-        """Write ISN bytes to data at specified address."""
-        data[address : address + ISN_LENGTH] = isn_bytes
+        except OSError as error:
+            self.status.setText(f"File error: {error}")
 
     def _load_and_prepare_target(
         self, file_path: str, isn_bytes: bytes
@@ -424,38 +366,18 @@ class IsnCopierTab(QWidget):
         isn_address = config["isn_address"]
         padding_size = config["immo_padding_size"]
 
-        if not self._is_file_large_enough(target_data, isn_address + padding_size):
+        if len(target_data) < isn_address + padding_size:
             # the area holds the ISN, then FF to its end
             filler = padding_size - ISN_LENGTH
             self.status.setText(self._too_small("error_target_too_small", filler))
             return None
 
-        self._fill_immo_area(target_data, isn_address, padding_size)
-        self._write_isn_to_data(target_data, isn_address, isn_bytes)
+        target_data[isn_address : isn_address + padding_size] = (
+            bytes([PADDING_BYTE]) * padding_size
+        )
+        target_data[isn_address : isn_address + ISN_LENGTH] = isn_bytes
 
         return target_data
-
-    def _should_apply_patches(self) -> bool:
-        """Check if any immobiliser patches should be applied."""
-        return (
-            self.immobiliser_bypass_checkbox.isChecked()
-            or self.immobiliser_revert_checkbox.isChecked()
-        )
-
-    def _apply_patches(
-        self, target_data: bytearray, patches: list, patch_type: str
-    ) -> None:
-        """Apply a list of patches to target data.
-
-        Args:
-            target_data: Data to modify
-            patches: List of patch dictionaries
-            patch_type: Either 'patched' or 'original'
-        """
-        for patch in patches:
-            addr = patch["address"]
-            data = patch[patch_type]
-            target_data[addr : addr + len(data)] = data
 
     def _bypass_fits(self, data: bytes, revert: bool) -> bool:
         """Whether the data can take the bypass, the rest of a half-done one, or its revert."""
@@ -472,7 +394,10 @@ class IsnCopierTab(QWidget):
         Returns:
             False, with nothing changed, if the file can't take the patches
         """
-        if not self._should_apply_patches():
+        if not (
+            self.immobiliser_bypass_checkbox.isChecked()
+            or self.immobiliser_revert_checkbox.isChecked()
+        ):
             return True
 
         revert = not self.immobiliser_bypass_checkbox.isChecked()
@@ -480,28 +405,26 @@ class IsnCopierTab(QWidget):
             self.status.setText(self.t["error_bypass_unsupported"])
             return False
 
-        patches = self._get_dme_config()["immobiliser_patches"]
-        self._apply_patches(target_data, patches, "original" if revert else "patched")
+        patch_type = "original" if revert else "patched"
+        for patch in self._get_dme_config()["immobiliser_patches"]:
+            address = patch["address"]
+            data = patch[patch_type]
+            target_data[address : address + len(data)] = data
         return True
-
-    def _clear_bypass_selections(self) -> None:
-        """Clear all bypass checkbox selections."""
-        self.immobiliser_bypass_checkbox.setChecked(False)
-        self.immobiliser_revert_checkbox.setChecked(False)
 
     def _save_modified_file(
         self, original_path: str, target_data: bytearray, isn_bytes: bytes
     ) -> None:
         """Save modified target file and update status."""
-        new_file_path = self._get_modified_filepath(original_path)
-        with open(new_file_path, "wb") as f:
-            f.write(target_data)
+        new_file_path = modified_path(original_path)
+        new_file_path.write_bytes(target_data)
 
-        hex_value = self._bytes_to_hex_string(isn_bytes)
-        filename = Path(new_file_path).name
-        self.status.setText(self.t["success"].format(hex_value, filename))
+        self.status.setText(
+            self.t["success"].format(isn_bytes.hex().upper(), new_file_path.name)
+        )
 
-        self._clear_bypass_selections()
+        self.immobiliser_bypass_checkbox.setChecked(False)
+        self.immobiliser_revert_checkbox.setChecked(False)
 
     def _too_small(self, key: str, length: int) -> str:
         """Say which address and how many bytes after it this DME type needs."""
@@ -512,12 +435,3 @@ class IsnCopierTab(QWidget):
         """Get the configuration for the currently selected DME type."""
         dme_type = self.dme_selector.currentText()
         return DME_CONFIGS[dme_type]
-
-    @staticmethod
-    def _get_modified_filepath(original_path: str) -> str:
-        """Generate modified file path with datetime suffix."""
-        path = Path(original_path)
-        timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
-        new_filename = f"{path.stem}_{timestamp}{path.suffix}"
-        new_path = path.parent / new_filename
-        return str(new_path)

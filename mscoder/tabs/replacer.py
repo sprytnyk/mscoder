@@ -1,6 +1,5 @@
 """VIN Replacer tab - finds and replaces VINs in binary files."""
 
-from datetime import UTC, datetime
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -12,11 +11,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..paths import modified_path
 from ..translations import get_translations
 from ..utils import vin_to_bytes
 from ..widgets import StatusLabel, tab_layout
 
-# Constants
 VIN_LENGTH = 17
 
 
@@ -110,48 +109,43 @@ class VinReplacerTab(QWidget):
 
     def _process_file(self) -> None:
         """Find and replace VIN in the selected binary file."""
+        original_vin = self.original_vin_input.text().strip()
+        replace_vin = self.replace_vin_input.text().strip()
+        file_path = self.file_path_input.text().strip()
+
+        if not original_vin or not replace_vin or not file_path:
+            self.status.setText(self.t["error_required"])
+            return
+
+        if len(original_vin) != VIN_LENGTH:
+            self.status.setText(self.t["error_original_length"])
+            return
+
+        if len(replace_vin) != VIN_LENGTH:
+            self.status.setText(self.t["error_replace_length"])
+            return
+
         try:
-            original_vin = self.original_vin_input.text().strip()
-            replace_vin = self.replace_vin_input.text().strip()
-            file_path = self.file_path_input.text().strip()
-
-            # Validate inputs
-            if not original_vin or not replace_vin or not file_path:
-                self.status.setText(self.t["error_required"])
-                return
-
-            if len(original_vin) != VIN_LENGTH:
-                self.status.setText(self.t["error_original_length"])
-                return
-
-            if len(replace_vin) != VIN_LENGTH:
-                self.status.setText(self.t["error_replace_length"])
-                return
-
-            # Convert VINs to hex bytes
             original_hex = vin_to_bytes(original_vin)
             replace_hex = vin_to_bytes(replace_vin)
+        except ValueError as error:
+            self.status.setText(f"Error: {error}")
+            return
 
-            # Read the file
-            with open(file_path, "rb") as f:
-                data = bytearray(f.read())
-
-            # Find and replace all occurrences
+        try:
+            data = bytearray(Path(file_path).read_bytes())
             occurrences = self._replace_in_data(data, original_hex, replace_hex)
-
             if occurrences == 0:
                 self.status.setText(self.t["no_matches"])
                 return
 
-            # Save to new file with prefix
-            new_file_path = self._get_modified_filepath(file_path)
-            with open(new_file_path, "wb") as f:
-                f.write(data)
+            new_file_path = modified_path(file_path)
+            new_file_path.write_bytes(data)
+        except OSError as error:
+            self.status.setText(f"Error: {error}")
+            return
 
-            filename = Path(new_file_path).name
-            self.status.setText(self.t["success"].format(occurrences, filename))
-        except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
+        self.status.setText(self.t["success"].format(occurrences, new_file_path.name))
 
     @staticmethod
     def _replace_in_data(data: bytearray, original: bytes, replacement: bytes) -> int:
@@ -166,10 +160,3 @@ class VinReplacerTab(QWidget):
             occurrences += 1
             pos += len(original)  # Advance by the length we just replaced
         return occurrences
-
-    @staticmethod
-    def _get_modified_filepath(original_path: str) -> str:
-        """Generate modified file path with datetime suffix."""
-        path = Path(original_path)
-        timestamp = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
-        return str(path.parent / f"{path.stem}_{timestamp}{path.suffix}")

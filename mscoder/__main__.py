@@ -1,6 +1,7 @@
 """MS43 MSCoder - Main application window."""
 
 import sys
+from functools import partial
 from pathlib import Path
 
 from PySide6.QtGui import QIcon, QKeySequence, QShortcut
@@ -15,17 +16,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-# Handle both direct execution and module execution
-try:
+if __package__:
     from . import theme
     from .paths import ASSETS
     from .tabs import AboutTab, IsnCopierTab, VinConverterTab, VinReplacerTab
     from .translations import get_translations
-except ImportError:
-    # Direct execution fallback
-    import sys
-    from pathlib import Path
-
+else:
+    # Direct execution, including the PyInstaller entry point.
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from mscoder import theme
     from mscoder.paths import ASSETS
@@ -87,18 +84,10 @@ class MSCoder(QMainWindow):
         central_widget.setLayout(main_layout)
 
         # Add keyboard shortcuts for tabs
-        QShortcut(QKeySequence("Alt+1"), self).activated.connect(
-            lambda: self.tabs.setCurrentIndex(0)
-        )
-        QShortcut(QKeySequence("Alt+2"), self).activated.connect(
-            lambda: self.tabs.setCurrentIndex(1)
-        )
-        QShortcut(QKeySequence("Alt+3"), self).activated.connect(
-            lambda: self.tabs.setCurrentIndex(2)
-        )
-        QShortcut(QKeySequence("Alt+4"), self).activated.connect(
-            lambda: self.tabs.setCurrentIndex(3)
-        )
+        for index in range(self.tabs.count()):
+            QShortcut(QKeySequence(f"Alt+{index + 1}"), self).activated.connect(
+                partial(self.tabs.setCurrentIndex, index)
+            )
 
     def _change_language(self, index: int) -> None:
         """Handle language change from combo box."""

@@ -12,7 +12,6 @@ from ..translations import get_translations
 from ..utils import vin_to_bytes, vin_to_str
 from ..widgets import StatusLabel, tab_layout
 
-# Constants
 VIN_LENGTH = 17
 HEX_LENGTH = 26  # 13 bytes * 2
 
@@ -69,10 +68,10 @@ class VinConverterTab(QWidget):
         self.layout.addWidget(self.hex_label)
         self.layout.addWidget(self.hex_input)
 
-        btns = QHBoxLayout()
-        btns.addWidget(self.btn_to_hex)
-        btns.addWidget(self.btn_to_str)
-        self.layout.addLayout(btns)
+        buttons = QHBoxLayout()
+        buttons.addWidget(self.btn_to_hex)
+        buttons.addWidget(self.btn_to_str)
+        self.layout.addLayout(buttons)
         self.layout.addWidget(self.status)
         self.layout.addStretch()
 
@@ -92,33 +91,30 @@ class VinConverterTab(QWidget):
 
     def _to_hex(self) -> None:
         """Convert VIN string to hex bytes."""
+        vin = self.vin_input.text().strip()
+        if len(vin) != VIN_LENGTH:
+            self.status.setText(self.t["error_vin_length"])
+            return
         try:
-            vin = self.vin_input.text().strip()
-            if len(vin) != VIN_LENGTH:
-                self.status.setText(self.t["error_vin_length"])
-                return
             data = vin_to_bytes(vin)
-            hex_result = "".join(f"{b:02X}" for b in data)
-            self.hex_input.setText(hex_result)
-            self.status.setText(self.t["ok"])
-        except Exception as e:
-            self.status.setText(f"Error: {str(e)}")
+        except ValueError as error:
+            self.status.setText(f"Error: {error}")
+            return
+        self.hex_input.setText(data.hex().upper())
+        self.status.setText(self.t["ok"])
 
     def _to_str(self) -> None:
         """Convert hex bytes to VIN string."""
+        hex_text = self.hex_input.text().strip().replace(" ", "")
+
+        if hex_text.lower().startswith("0x"):
+            hex_text = hex_text[2:]
+
+        if len(hex_text) != HEX_LENGTH:
+            self.status.setText(self.t["error_hex_length"])
+            return
+
         try:
-            hex_text = self.hex_input.text().strip().replace(" ", "")
-
-            # Remove 0x prefix if present
-            if hex_text.lower().startswith("0x"):
-                hex_text = hex_text[2:]
-
-            # Validate hex length
-            if len(hex_text) != HEX_LENGTH:
-                self.status.setText(self.t["error_hex_length"])
-                return
-
-            # Parse hex string in pairs
             raw = bytes(
                 int(hex_text[i : i + 2], 16) for i in range(0, len(hex_text), 2)
             )
